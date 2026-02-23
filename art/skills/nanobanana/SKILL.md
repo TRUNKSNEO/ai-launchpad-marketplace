@@ -252,6 +252,37 @@ results = batch_generate(
 successful = [r for r in results if r["success"]]
 ```
 
+### Pattern 4: Sequential generation for series
+
+When a downstream skill needs multiple consistently-styled images (e.g., newsletter visuals, thumbnail A/B variants), use the anchor-and-reference pattern:
+
+```python
+from generate import generate_image
+
+# Step 1: Generate the style anchor
+anchor = generate_image(
+    prompt="warm illustration style, earth tones, soft gradients, clean lines",
+    output_path="anchor.png",
+    model="pro",
+)
+
+# Step 2: Generate each image in the series, referencing the anchor
+subjects = ["laptop on desk with coffee", "person reading a book", "sunrise over mountains"]
+series_paths = [anchor["path"]]
+
+for i, subject in enumerate(subjects):
+    result = generate_image(
+        prompt=f"{subject}, matching the visual style and color palette of the reference image exactly",
+        input_paths=[anchor["path"]],  # always include the anchor
+        output_path=f"series_{i+1:02d}.png",
+        model="pro",
+    )
+    if result["success"]:
+        series_paths.append(result["path"])
+```
+
+The full sequential generation patterns are documented in the [Sequential Generation](#sequential-generation) section above.
+
 ## Environment Variables
 
 | Variable | Description | Default |
