@@ -27,6 +27,8 @@ Use the view-team-session skill on the session where we reviewed my newsletter d
 
 This generates a self-contained HTML viewer at `.claude/output/<session-id>.html` and opens it in your browser. For team sessions, it automatically discovers all teammate logs and shows the full inter-agent DM timeline.
 
+![Session Viewer](./assets/session-viewer.png)
+
 ### Step 2: Export the session
 
 In the HTML viewer, use the browser's export mechanism to download a markdown transcript of the session. The exported file will save to your Downloads folder.
