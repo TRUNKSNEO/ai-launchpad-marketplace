@@ -7,6 +7,26 @@ Developer tools for Claude Code agent team sessions. View session timelines, ana
 - [uv](https://docs.astral.sh/uv/getting-started/installation/) (required for Python scripts)
 - AI Launchpad marketplace added — see [main README](../README.md)
 
+### Optional: Installing tmux
+
+tmux is **not required** — agent teams run natively in Claude Code. However, if you want the multi-pane terminal view to watch all agents side-by-side, you'll need tmux installed.
+
+**Mac:**
+```bash
+brew install tmux
+```
+
+**Windows (WSL required):**
+```bash
+sudo apt update && sudo apt install tmux
+```
+> tmux is Linux-only. On Windows, install [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) first (`wsl --install`), then install tmux inside WSL.
+
+**Starting a tmux session:**
+```bash
+tmux new-session -s claude-work
+```
+
 ## Installation
 
 ```
