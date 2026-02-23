@@ -264,3 +264,125 @@ When generating multiple variations:
 "pixel art robot, 8-bit style, blue and silver colors, friendly expression"
 "pixel art robot, 8-bit style, blue and gold colors, heroic pose"
 ```
+
+## Sequential Generation Prompts
+
+Prompt templates for maintaining visual consistency across a series of images using the `-i` reference flag.
+
+### Style-Board Anchor Prompts
+
+Generate the anchor image that establishes the visual identity for a series:
+
+```
+{style} style, {color palette} color palette, {lighting} lighting,
+{mood} atmosphere, {texture/detail level}, cohesive visual identity
+```
+
+**Examples:**
+```
+Modern flat illustration, warm earth tones and muted pastels,
+soft ambient lighting, cozy inviting atmosphere, clean lines with
+subtle gradients, cohesive visual identity
+
+Dark moody photography style, deep blues and amber highlights,
+dramatic side lighting, cinematic atmosphere, high contrast with
+film grain, cohesive visual identity
+```
+
+### Referencing an Anchor
+
+When generating subsequent images that reference the anchor:
+
+```
+{subject description}, matching the visual style, color palette,
+and lighting of the reference image exactly
+```
+
+**Key phrasing patterns:**
+- "matching the visual style of the reference image exactly"
+- "using the same color palette and artistic style as the reference"
+- "in the same style as the first image, with identical lighting and color treatment"
+
+**Be explicit about what to preserve vs. change:**
+```
+# Good — clear about what changes and what stays
+"a mountain landscape at sunset, using the exact same illustration style,
+color palette, and line weight as the reference image"
+
+# Bad — ambiguous about style preservation
+"a mountain landscape at sunset, similar to the reference"
+```
+
+### Subject Consistency Prompts
+
+Establish the subject with detailed, reusable appearance description:
+
+```
+{subject} with {distinguishing features}, {colors/materials},
+{proportions}, {expression/pose}, on {simple background}
+```
+
+Reference the subject in new scenes:
+
+```
+the same {subject} from the reference image, now {new action/pose},
+same proportions and colors, {new background/setting}
+```
+
+**Tip:** Include "same proportions and colors" explicitly — without it, the model may drift on physical attributes across scenes.
+
+### A/B Variant Prompts
+
+Generate multiple compositions sharing the same style for split-testing:
+
+```bash
+# Variant A: Close-up with text space on right
+uv run generate.py "close-up portrait composition with negative space on the right, \
+  matching the style of the reference image" -i anchor.png -o variant_a.png
+
+# Variant B: Wide shot with centered subject
+uv run generate.py "wide shot with centered subject and blurred background, \
+  matching the style of the reference image" -i anchor.png -o variant_b.png
+
+# Variant C: Dynamic angle with high energy
+uv run generate.py "dynamic low-angle shot with dramatic perspective, \
+  matching the style of the reference image" -i anchor.png -o variant_c.png
+```
+
+### Newsletter Series Prompts
+
+Generate a set of visuals for a single newsletter issue with consistent styling:
+
+```bash
+# Anchor: Establish the issue's visual identity
+uv run generate.py "minimalist tech illustration, teal and coral accents, \
+  clean vector style, light gray background, cohesive identity" \
+  --model pro -o newsletter_anchor.png
+
+# Hero image
+uv run generate.py "wide banner showing AI workflow automation concept, \
+  matching the style of the reference image exactly" \
+  -i newsletter_anchor.png --ratio 21:9 -o hero.png
+
+# Section illustration 1
+uv run generate.py "person collaborating with AI assistant on laptop, \
+  matching the style of the reference image exactly" \
+  -i newsletter_anchor.png --ratio 16:9 -o section_1.png
+
+# Section illustration 2
+uv run generate.py "abstract data flow visualization, \
+  matching the style of the reference image exactly" \
+  -i newsletter_anchor.png --ratio 16:9 -o section_2.png
+```
+
+### Sequential Prompting Tips
+
+1. **Reference ordering matters** — Put the style anchor as the first `-i` argument. The model gives slightly more weight to earlier references.
+
+2. **Be specific about preservation** — "matching the visual style" is okay; "matching the visual style, color palette, lighting, and line weight" is better.
+
+3. **Describe what changes, not just what stays** — The model handles conflicting signals better when you clearly separate "keep X" from "change Y."
+
+4. **Cap your reference pool** — 3-4 images is the sweet spot. Beyond that, the model averages too many inputs and the result loses character.
+
+5. **Use consistent terminology** — If you called it "warm earth tones" in the anchor prompt, use "warm earth tones" (not "natural colors") in follow-up prompts.
