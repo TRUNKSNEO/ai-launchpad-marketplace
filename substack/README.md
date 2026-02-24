@@ -21,3 +21,4 @@ Restart Claude Code for the changes to take effect.
 | `plan-issue` | Plan a complete newsletter issue from topic to publication-ready content |
 | `optimize-issue` | Optimize an existing draft or write a full issue from an outline |
 | `create-note` | Create standalone Substack Notes for engagement and audience growth |
+| `generate-note-ideas` | Scan published content and generate batches of Substack Note ideas |
