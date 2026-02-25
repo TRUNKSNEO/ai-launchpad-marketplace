@@ -36,8 +36,7 @@ Individual plugins may have additional requirements — refer to each plugin's R
 | [Branding Kit](./branding-kit) | Design systems and brand guidelines |
 | [Research](./research) | Web research and competitor analysis |
 | [Agent Teams](./agent-teams) | Agent team session viewing and analysis |
-| [Skill Factory](./skill-factory) | Create new skills following the composable skill architecture |
-| [Skill Evolution](./skill-evolution) | Self-improving skills via session retrospectives |
+| [Skill Forge](./skill-forge) | Full skill lifecycle — create, integrate, and improve skills |
 
 ## Author
 

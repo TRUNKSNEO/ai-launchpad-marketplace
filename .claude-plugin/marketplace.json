@@ -50,14 +50,9 @@
       "description": "A plugin for Substack content workflows — orchestrates research, writing, and design skills for newsletter issues and Substack Notes"
     },
     {
-      "name": "skill-factory",
-      "source": "./skill-factory",
-      "description": "A meta-plugin for creating new skills that conform to the composable skill architecture framework"
-    },
-    {
-      "name": "skill-evolution",
-      "source": "./skill-evolution",
-      "description": "A meta-plugin for self-improving skills over time. Captures session friction and writes improvement notes to auto-memory."
+      "name": "skill-forge",
+      "source": "./skill-forge",
+      "description": "A meta-plugin for the full skill lifecycle — create, integrate, and improve skills that conform to the composable skill architecture framework"
     },
     {
       "name": "agent-teams",

@@ -1,6 +1,6 @@
-# Skill Factory
+# Skill Forge
 
-Meta-plugin for creating and integrating skills that conform to the composable skill architecture framework. Ensures consistency, proper classification, composition hooks, and structural limits.
+Meta-plugin for the full skill lifecycle — create, integrate, and improve skills that conform to the composable skill architecture framework. Ensures consistency, proper classification, composition hooks, and structural limits.
 
 ## Prerequisites
 
@@ -9,7 +9,7 @@ Meta-plugin for creating and integrating skills that conform to the composable s
 ## Installation
 
 ```
-/plugin install skill-factory@ai-launchpad-marketplace
+/plugin install skill-forge@ai-launchpad-marketplace
 ```
 
 Restart Claude Code for the changes to take effect.
@@ -20,3 +20,4 @@ Restart Claude Code for the changes to take effect.
 |-------|-------------|
 | `create-skill` | Guided workflow for creating new skills — classification, template selection, generation, and validation |
 | `integrate-skill` | Integrate existing skills from any source into the composable architecture |
+| `retrospective` | Interactive session review — detects friction, classifies findings, and writes confirmed improvements to MEMORY.md |

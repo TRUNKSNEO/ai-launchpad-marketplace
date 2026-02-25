@@ -46,8 +46,8 @@ After classifying a skill as Task, ask: "Does this task skill include executable
 
 **What it is**: Creates or maintains other skills within the framework.
 **Key signal**: Its output is a new skill, not content for end users.
-**Examples**: `skill-factory:create-skill`
-**Plugin home**: `skill-factory/`
+**Examples**: `skill-forge:create-skill`
+**Plugin home**: `skill-forge/`
 
 ---
 

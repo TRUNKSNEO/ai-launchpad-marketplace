@@ -9,7 +9,7 @@ description: Create new skills that conform to the composable skill architecture
 
 This meta-skill guides the creation of new skills that conform to the composable skill architecture. Every skill in the system follows a consistent pattern: it belongs to a category, lives in the right plugin, uses the right template, and includes the required composition hooks. This skill enforces all of that.
 
-**Core Principle**: The skill-factory exists to enforce consistency. New skills should look and behave like existing ones. If a new skill breaks the pattern, it breaks the architecture.
+**Core Principle**: The skill-forge exists to enforce consistency. New skills should look and behave like existing ones. If a new skill breaks the pattern, it breaks the architecture.
 
 ## When to Use
 
@@ -68,7 +68,7 @@ Based on the classification, determine where the skill belongs:
 - `youtube/` -- for YouTube workflows
 - `substack/` -- for Substack workflows
 - Or a new orchestrator plugin for a new platform
-**Meta skills** --> `skill-factory/`
+**Meta skills** --> `skill-forge/`
 
 If the skill doesn't fit an existing plugin, create a new plugin:
 1. Create the plugin directory with `.claude-plugin/plugin.json`

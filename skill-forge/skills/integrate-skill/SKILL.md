@@ -1,13 +1,13 @@
 ---
 name: integrate-skill
-description: Integrate an existing skill from another project into the AI Launchpad Marketplace following the composable skill architecture framework defined in the skill-factory:create-skill. Use whenever migrating or reproducing an existing skill into the AI Launchpad Marketplace.
+description: Integrate an existing skill from another project into the AI Launchpad Marketplace following the composable skill architecture framework defined in the skill-forge:create-skill. Use whenever migrating or reproducing an existing skill into the AI Launchpad Marketplace.
 ---
 
 # Integrate Skill
 
 ## Overview
 
-This meta-skill formalizes the process of taking an existing skill from any source -- an external repository, a `temp/` holding directory, a standalone file, or another project -- and decomposing it into the composable skill architecture. Source skills are rarely structured for composability. They bundle strategy, writing, platform knowledge, and workflow logic into a single file. This skill breaks that monolith apart, maps each piece to the right plugin and category, and delegates actual skill generation to `skill-factory:create-skill`.
+This meta-skill formalizes the process of taking an existing skill from any source -- an external repository, a `temp/` holding directory, a standalone file, or another project -- and decomposing it into the composable skill architecture. Source skills are rarely structured for composability. They bundle strategy, writing, platform knowledge, and workflow logic into a single file. This skill breaks that monolith apart, maps each piece to the right plugin and category, and delegates actual skill generation to `skill-forge:create-skill`.
 
 **Core Principle**: Integration is decomposition. A source skill that "does everything" becomes multiple focused pieces that compose well. Nothing from the source gets dropped; everything gets placed.
 
@@ -21,7 +21,7 @@ Use this skill when:
 - Porting platform-specific automation into the architecture
 
 Do NOT use this skill when:
-- Creating a skill from scratch (use `skill-factory:create-skill` directly)
+- Creating a skill from scratch (use `skill-forge:create-skill` directly)
 - The source is an idea or description, not an existing skill file
 
 ## Integration Workflow
@@ -51,7 +51,7 @@ If the source skill has no clear boundary (e.g., it is embedded in a larger docu
 
 ### Step 2: Analyze and Decompose
 
-**MANDATORY**: Read `skill-factory/skills/create-skill/references/taxonomy.md` before proceeding.
+**MANDATORY**: Read `skill-forge/skills/create-skill/references/taxonomy.md` before proceeding.
 
 For each distinct piece of content in the source skill, classify it using the taxonomy decision tree:
 
@@ -59,7 +59,7 @@ For each distinct piece of content in the source skill, classify it using the ta
 2. Does it define how output sounds or feels? --> **Personality** --> likely `writing/`
 3. Does it do one specific thing well? --> **Task** --> likely `writing/`, `content-strategy/`, `visual-design/`, `art/`, `research/`, or `personal-assistant/`
 4. Does it sequence multiple task skills for a platform workflow? --> **Orchestrator** --> likely `youtube/`, `substack/`, or a new platform plugin
-5. Does it create or maintain other skills? --> **Meta** --> `skill-factory/`
+5. Does it create or maintain other skills? --> **Meta** --> `skill-forge/`
 
 For each piece, determine:
 - **Category**: Which of the five categories it belongs to
@@ -132,9 +132,9 @@ Do NOT proceed to Step 5 until the user confirms the design. If the user request
 With the approved design, create each piece:
 
 **For each new skill identified in the design:**
-1. Invoke `skill-factory:create-skill` with the classification, plugin placement, and content from the design doc
-2. Let `skill-factory:create-skill` handle template selection, composition hooks, validation, and invocation of authoring best practices (`skill-creator:skill-creator`, `superpowers:writing-skills`)
-3. Do NOT generate SKILL.md files directly -- always delegate to `skill-factory:create-skill`
+1. Invoke `skill-forge:create-skill` with the classification, plugin placement, and content from the design doc
+2. Let `skill-forge:create-skill` handle template selection, composition hooks, validation, and invocation of authoring best practices (`skill-creator:skill-creator`, `superpowers:writing-skills`)
+3. Do NOT generate SKILL.md files directly -- always delegate to `skill-forge:create-skill`
 
 **For each reference file identified in the design:**
 1. Create the reference file in the correct plugin's `skills/[skill-name]/references/` directory
@@ -155,7 +155,7 @@ With the approved design, create each piece:
 Run verification against the approved design:
 
 **Framework validation:**
-- Invoke `skill-factory:create-skill` Step 8 validation for each generated skill
+- Invoke `skill-forge:create-skill` Step 8 validation for each generated skill
 - Confirm every SKILL.md is under 500 lines
 - Confirm flat directory structure (max 2 levels)
 - Confirm frontmatter includes `name` and `description`
@@ -198,9 +198,9 @@ Before finalizing the integration:
 - [ ] Content split mapped to existing plugins or new plugins identified
 - [ ] Integration design doc produced and user-approved
 - [ ] Functionality preservation table confirms zero loss of function
-- [ ] `skill-factory:create-skill` invoked for each resulting skill piece
+- [ ] `skill-forge:create-skill` invoked for each resulting skill piece
 - [ ] Reference files created in correct foundation plugin directories
-- [ ] All generated skills pass `skill-factory:create-skill` Step 8 framework validation
+- [ ] All generated skills pass `skill-forge:create-skill` Step 8 framework validation
 - [ ] Plugin versions bumped for all modified plugins
 - [ ] New plugins have complete structure (`plugin.json`, `README.md`) if created
 - [ ] Source cleanup proposed and user-confirmed
@@ -214,6 +214,6 @@ Before finalizing the integration:
 
 3. **Fat reference files**: Dumping all source content into a single reference file. Reference files should be focused on one topic. Strategy content and writing templates are separate files even if the source bundled them together.
 
-4. **Skipping create-skill**: Generating SKILL.md files directly instead of invoking `skill-factory:create-skill`. The create-skill workflow enforces template selection, composition hooks, and validation. Bypassing it produces skills that miss framework requirements.
+4. **Skipping create-skill**: Generating SKILL.md files directly instead of invoking `skill-forge:create-skill`. The create-skill workflow enforces template selection, composition hooks, and validation. Bypassing it produces skills that miss framework requirements.
 
 5. **Legacy syntax in generated files**: Carrying over outdated invocation patterns from the source skill (bare skill names, slash commands, non-standard references). All generated content must use current `plugin:skill` syntax and follow current framework conventions.
