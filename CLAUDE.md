@@ -1,0 +1,2 @@
+- All documentation, research, and plans must be saved to the .docs/ folder, which is untracked and not committed to Git
+- Any test created must be saved to .tests/
