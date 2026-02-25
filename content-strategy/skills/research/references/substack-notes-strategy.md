@@ -87,37 +87,105 @@ How Notes actually spread — different from other platforms:
 | 3 | **Reply visibility** | Replying to other writers' Notes surfaces your profile to their audience |
 | 4 | **Recommendation algorithm** | Substack recommends Notes from writers similar to ones a reader already follows — engagement signals drive this |
 | 5 | **Consistency signal** | Regular posting teaches the algorithm you're an active creator worth surfacing; sporadic posting gets deprioritized |
+| 6 | **Comment threads** | Replying to every comment creates threads — the algorithm interprets this as active conversation and distributes the Note more widely |
+| 7 | **Spacing** | Notes posted hours apart each get their own algorithm window; notes posted minutes apart compete with each other |
 
 **Key takeaway:** Restacks are the primary amplification mechanism on Notes. Writing restackable content — standalone insights, quotable observations, useful frameworks — is the single highest-leverage strategy. Engage with other writers' Notes to build reciprocal visibility.
 
+## Algorithm Compounding Timeline
+
+The Substack Notes algorithm doesn't reward you linearly — it compounds. Understanding the timeline prevents quitting during the invisible phase.
+
+| Phase | Timeline | What Happens |
+|---|---|---|
+| **Training** | Months 1-3 | Minimal reach. The algorithm is learning who you are, what topics you own, and whether you're consistent. Engagement feels low. This is normal. |
+| **Recognition** | Months 4-6 | Noticeable uptick. The algorithm starts surfacing your Notes to non-followers. Restacks begin compounding. |
+| **Compounding** | Months 7-12 | Exponential growth on the same quality of content. The algorithmic trust you built pays dividends. |
+
+**Evidence:** The same note posted at Month 2 got 12 likes. The identical note posted at Month 10 got 2,100 likes. Same words, same message — different algorithmic trust.
+
+**Implication:** Most people abandon Notes after 30-60 days because engagement is low. That's exactly when the compounding is about to kick in. Consistency through the training phase is the single most important factor.
+
+## Conversion vs. Engagement
+
+Not all engagement is equal. Notes that get likes are not the same as Notes that get subscribers. Understanding this distinction is critical for growth-focused posting.
+
+### The Core Insight
+
+**Entertainment gets likes. Education gets subscribers. Generosity gets both.**
+
+| Metric | What It Measures | Growth Impact |
+|---|---|---|
+| **Likes** | Casual appreciation | Low — vanity metric. A note with 2,800 likes can bring 105 subscribers. |
+| **Restacks** | Amplification reach | Medium — brings exposure to new audiences, but doesn't directly convert. |
+| **Comments** | Depth of engagement | High — signals genuine conversation. Algorithm weights comments more than likes for distribution. |
+| **Subscriber growth** | Actual conversion | **This is the metric that matters.** Track subscribers per note, not likes. |
+
+### High-Converter Note Types
+
+These types drive the most subscriber growth per note:
+1. **Problem → Solution (Quick Fix)** — "I need more of this" response
+2. **Build-in-Public (Generosity variant)** — "This person genuinely helps" response
+3. **Income Proof Story (Personal Story + Data)** — "They proved it's possible" response
+4. **List-Based Tactical** — "I can use this right now" response
+5. **Direct Advice (Conversation Starter)** — Comments → algorithm → reach → conversion
+
+### Weekly Mix Recommendation
+
+Aim for at least 1 high-converter note per day. Balance with engagement types (Contrarian, Pattern Observation, Vulnerable Story) to maintain variety and algorithmic interest. The goal is not 100% converters — engagement types build the audience that converters activate.
+
+### Reply to Every Comment
+
+Reply to every comment on your Notes. This creates threads, which signals to the algorithm that your Note is generating genuine conversation. More threads → wider distribution → more non-follower reach.
+
 ## Posting Cadence
 
-### Optimal Frequency: 3-5 Notes Per Week
+### Target Frequency: 1-3 Notes Per Day
 
 | Cadence | Effect |
 |---|---|
-| < 2/week | Losing visibility between issues; algorithm deprioritizes inactive profiles |
-| 3-5/week | Sweet spot — daily on non-newsletter days maintains consistent presence |
-| 6-7/week | Acceptable if quality stays high; monitor for engagement drop-off |
-| Newsletter day | One strong note with the issue link; additional notes optional |
+| < 1/day | Losing visibility; algorithm deprioritizes inconsistent profiles |
+| 1/day | Solid baseline — enough to train the algorithm and maintain presence |
+| 2-3/day | Growth zone — enough variety to test formats and compound reach |
+| 3+/day | Aggressive growth — only sustainable with batch-writing and scheduling |
+
+### Ramping Schedule
+
+Don't start at max volume. Ramp up as you learn what works:
+
+| Phase | Cadence | Focus |
+|---|---|---|
+| Month 1-2 | 1 note/day | Get comfortable with the format. Start engaging with others. The algorithm is still learning who you are. |
+| Month 3-6 | 2-3 notes/day | Experiment with different note types. Start batch-writing weekly. Track which types convert. |
+| Month 6+ | 3+ notes/day if sustainable | Compounding kicks in. Double down on your top-performing types. |
+
+**Key insight:** Your first 50-100 Notes are basically training data for the algorithm. You're teaching it who your audience is, what topics you own, and whether you're consistent. Once it learns, your reach explodes — but you have to survive the invisible phase first.
+
+### Daily Scheduling Framework
+
+Space notes throughout the day. Each note gets its own window with the algorithm — don't dump them all at once.
+
+| Time Slot (PT) | Recommended Type | Rationale |
+|---|---|---|
+| **Morning (6-9 AM)** | Personal story, reflection, or vulnerable note | Emotional content resonates when people start their day |
+| **Late morning (9-11 AM)** | Tactical / Quick Fix / List-Based | Focused work time — readers want actionable content |
+| **Midday (11 AM-1 PM)** | Contrarian take or Conversation Starter | Peak engagement window for debate and discussion |
+| **Afternoon (2-4 PM)** | Generosity note or Behind-the-Scenes | Lighter content for afternoon browsing |
+| **Evening (7-9 PM)** | Vulnerability or personal note | Reflective mood — tends to get more comments and subscriber conversions |
+
+When posting fewer than 3/day, prioritize the morning and evening slots — they bookend the reader's day.
 
 ### Suggested Weekly Mix
 
-| Day | Post Type |
-|---|---|
-| **Monday** | Pattern Observation or Quick Tip (start the week with value) |
-| **Tuesday** | Pre-newsletter teaser or poll (if issue publishes Wed/Thu) |
-| **Wednesday/Thursday** | Issue-day note with key takeaway + link |
-| **Friday** | Post-issue follow-up or reader response highlight |
-| **Weekend** | Personal update or Build-in-Public (casual tone matches weekend browsing) |
+| Day | Notes | Type Mix |
+|---|---|---|
+| **Monday** | 1-3 | Start with a Pattern Observation or Quick Tip. Include at least 1 high-converter. |
+| **Tuesday** | 1-3 | Pre-newsletter teaser if issue publishes Wed/Thu. Otherwise, tactical content. |
+| **Wednesday/Thursday** | 1-3 | Issue-day note with key takeaway + link. Fill remaining slots with standalone value. |
+| **Friday** | 1-3 | Post-issue follow-up or reader response highlight. Conversation starters perform well. |
+| **Weekend** | 1-2 | Personal update, Build-in-Public, or Generosity note. Casual tone matches weekend browsing. |
 
 Adjust based on your newsletter schedule — always align the teaser with 1-2 days before your issue and the follow-up with 2-5 days after.
-
-### Timing
-
-- **Morning (7-9am):** Best for polls and questions — people engage while starting their day
-- **Early afternoon (12-2pm):** Best for insights and tactical content — focused reading time
-- **Align with audience:** If your analytics show a different peak, follow the data over general advice
 
 ## Cross-Platform Synergy
 
