@@ -201,3 +201,10 @@ class TestSchedulerRegistry:
             lst = run_scheduler(tmpdir, ["list"])
             tasks = json.loads(lst.stdout)
             assert len(tasks) == 3
+
+    def test_save_registry_no_tmp_left_behind(self):
+        """After add, no .tmp files remain in scheduler dir (atomic write cleanup)."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            add_default_task(tmpdir)
+            tmp_files = list(Path(tmpdir).glob("*.tmp"))
+            assert len(tmp_files) == 0, f"Leftover .tmp files: {tmp_files}"

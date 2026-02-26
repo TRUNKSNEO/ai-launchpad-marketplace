@@ -92,10 +92,16 @@ def _load_registry() -> dict:
 
 
 def _save_registry(registry: dict) -> None:
-    """Persist the registry to disk."""
+    """Persist the registry to disk atomically.
+
+    Writes to a temp file first, then uses os.replace() for an atomic
+    rename, preventing corrupt/partial writes on interruption.
+    """
     _ensure_dirs()
-    with open(REGISTRY_FILE, "w") as f:
+    tmp_file = REGISTRY_FILE.with_suffix(".tmp")
+    with open(tmp_file, "w") as f:
         json.dump(registry, f, indent=2)
+    os.replace(str(tmp_file), str(REGISTRY_FILE))
 
 
 def _error(msg: str) -> None:
@@ -601,8 +607,11 @@ def cmd_results(args: argparse.Namespace) -> None:
             print(f"No result files found for task '{args.id}'.", file=sys.stderr)
             return
 
-    # Default: find result files matching {id}.md in any date subdirectory
-    result_files = sorted(RESULTS_DIR.glob(f"*/{args.id}.md"), reverse=True)
+    # Default: find result files matching {id}.md or {id}-HHMMSS.md in any date subdirectory
+    legacy = list(RESULTS_DIR.glob(f"*/{args.id}.md"))
+    timestamped = list(RESULTS_DIR.glob(f"*/{args.id}-[0-9]*.md"))
+    result_files = sorted(set(legacy + timestamped),
+                          key=lambda p: (p.parent.name, p.name), reverse=True)
 
     if not result_files:
         print(f"No result files found for task '{args.id}'.", file=sys.stderr)
@@ -670,6 +679,44 @@ def cmd_repair(args: argparse.Namespace) -> None:
         print(f"Repair complete: {issues_fixed} issue(s) fixed.")
     else:
         print("Repair complete: no issues found.")
+
+
+def cmd_cleanup(args: argparse.Namespace) -> None:
+    """Delete log and result files older than --max-days."""
+    import shutil
+    import time
+
+    max_days = args.max_days
+    cutoff = time.time() - (max_days * 86400)
+    deleted_logs = 0
+    deleted_results = 0
+
+    # Clean log files by mtime
+    if LOGS_DIR.exists():
+        for log_file in LOGS_DIR.glob("*.log"):
+            if log_file.stat().st_mtime < cutoff:
+                log_file.unlink()
+                deleted_logs += 1
+
+    # Clean default result date-directories by directory name
+    if RESULTS_DIR.exists():
+        for date_dir in RESULTS_DIR.iterdir():
+            if not date_dir.is_dir():
+                continue
+            try:
+                dir_date = datetime.strptime(date_dir.name, "%Y-%m-%d")
+                if dir_date.timestamp() < cutoff:
+                    result_count = sum(1 for _ in date_dir.glob("*.md"))
+                    shutil.rmtree(date_dir)
+                    deleted_results += result_count
+            except ValueError:
+                continue  # Skip non-date directories
+
+    print(json.dumps({
+        "deleted_logs": deleted_logs,
+        "deleted_results": deleted_results,
+        "max_days": max_days,
+    }, indent=2))
 
 
 # ---------------------------------------------------------------------------
@@ -757,6 +804,12 @@ def main() -> None:
     # --- repair ---
     p_repair = subparsers.add_parser("repair", help="Regenerate missing wrappers/plists")
     p_repair.set_defaults(func=cmd_repair)
+
+    # --- cleanup ---
+    p_cleanup = subparsers.add_parser("cleanup", help="Delete old logs and results")
+    p_cleanup.add_argument("--max-days", type=int, default=30,
+                           help="Delete files older than N days (default: 30)")
+    p_cleanup.set_defaults(func=cmd_cleanup)
 
     args = parser.parse_args()
     args.func(args)

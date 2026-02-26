@@ -25,13 +25,15 @@ SCHEDULER_DIR="{scheduler_dir}"
 OUTPUT_DIR="{output_directory}"
 
 DATE=$(date '+%Y-%m-%d')
+TIMESTAMP=$(date '+%H%M%S')
 if [ -n "$OUTPUT_DIR" ]; then
   RESULT_DIR="$OUTPUT_DIR"
+  RESULT_FILE="$RESULT_DIR/$TASK_ID.md"
 else
   RESULT_DIR="$SCHEDULER_DIR/results/$DATE"
+  RESULT_FILE="$RESULT_DIR/$TASK_ID-$TIMESTAMP.md"
 fi
 LOG_FILE="$SCHEDULER_DIR/logs/$DATE-$TASK_ID.log"
-RESULT_FILE="$RESULT_DIR/$TASK_ID.md"
 LOCK_FILE="$SCHEDULER_DIR/.lock-$TASK_ID"
 mkdir -p "$RESULT_DIR" "$(dirname "$LOG_FILE")"
 
@@ -107,6 +109,14 @@ if [ $EXIT_CODE -eq 0 ]; then
 else
   log "FAIL   exit=$EXIT_CODE duration=${DURATION}s result=${RESULT_BYTES}B"
 fi
+
+# --- Update registry with run results ---
+log "UPDATE update-last-run exit=$EXIT_CODE duration=${DURATION}s"
+uv run "$SCHEDULER_PY" update-last-run \
+  --id "$TASK_ID" \
+  --exit-code $EXIT_CODE \
+  --duration $DURATION \
+  --result-file "$RESULT_FILE" >> "$LOG_FILE" 2>&1 || true
 
 # --- Notify ---
 if [ $EXIT_CODE -eq 0 ]; then

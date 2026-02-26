@@ -82,6 +82,56 @@ class TestResultsDefaultLocation:
             assert "No result files found" in result.stderr
 
 
+class TestResultsTimestampedFiles:
+    """Test cmd_results finds timestamped {id}-HHMMSS.md files."""
+
+    def test_results_finds_timestamped_files(self):
+        """cmd_results finds {id}-HHMMSS.md files and shows latest."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            result = add_task(tmpdir, task_id="ts-task")
+            assert result.returncode == 0, f"add failed: {result.stderr}"
+
+            date_dir = Path(tmpdir) / "results" / "2025-01-15"
+            date_dir.mkdir(parents=True, exist_ok=True)
+            (date_dir / "ts-task-090000.md").write_text("# Morning Run\n")
+            (date_dir / "ts-task-140000.md").write_text("# Afternoon Run\n")
+
+            result = run_scheduler(tmpdir, ["results", "--id", "ts-task"])
+            assert result.returncode == 0
+            # Latest alphabetically is 140000 (afternoon)
+            assert "Afternoon Run" in result.stdout
+
+    def test_results_all_shows_all_timestamped(self):
+        """--all flag shows all timestamped results."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            result = add_task(tmpdir, task_id="ts-all")
+            assert result.returncode == 0, f"add failed: {result.stderr}"
+
+            date_dir = Path(tmpdir) / "results" / "2025-01-15"
+            date_dir.mkdir(parents=True, exist_ok=True)
+            (date_dir / "ts-all-090000.md").write_text("# Morning\n")
+            (date_dir / "ts-all-140000.md").write_text("# Afternoon\n")
+
+            result = run_scheduler(tmpdir, ["results", "--id", "ts-all", "--all"])
+            assert result.returncode == 0
+            assert "Morning" in result.stdout
+            assert "Afternoon" in result.stdout
+
+    def test_results_backward_compatible_with_old_filenames(self):
+        """cmd_results still finds legacy {id}.md files."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            result = add_task(tmpdir, task_id="legacy-task")
+            assert result.returncode == 0, f"add failed: {result.stderr}"
+
+            date_dir = Path(tmpdir) / "results" / "2025-01-15"
+            date_dir.mkdir(parents=True, exist_ok=True)
+            (date_dir / "legacy-task.md").write_text("# Legacy Result\n")
+
+            result = run_scheduler(tmpdir, ["results", "--id", "legacy-task"])
+            assert result.returncode == 0
+            assert "Legacy Result" in result.stdout
+
+
 class TestResultsCustomOutputDirectory:
     """Test cmd_results reads from custom output_directory when set."""
 

@@ -253,6 +253,79 @@ class TestSchedulerGeneration(unittest.TestCase):
         self.assertIsNone(task["output_directory"])
 
     # ------------------------------------------------------------------
+    # Fix 1: update-last-run in wrapper
+    # ------------------------------------------------------------------
+
+    def test_wrapper_contains_update_last_run_call(self):
+        """Generated wrapper contains update-last-run call with required args."""
+        stdout, stderr, rc = self.add_task(task_id="ulr-test")
+        self.assertEqual(rc, 0, f"add failed: {stderr}")
+
+        wrapper_path = Path(self.tmpdir) / "wrappers" / "ulr-test.sh"
+        content = wrapper_path.read_text()
+        self.assertIn("update-last-run", content)
+        self.assertIn("--id", content)
+        self.assertIn("--exit-code", content)
+        self.assertIn("--duration", content)
+        self.assertIn("--result-file", content)
+        self.assertIn("|| true", content)
+
+    def test_wrapper_update_last_run_before_complete(self):
+        """For run-once tasks, update-last-run appears before complete --id."""
+        stdout, stderr, rc = self.run_scheduler(
+            "add",
+            "--id", "once-test",
+            "--name", "Once Test",
+            "--type", "prompt",
+            "--target", "test",
+            "--cron", "0 9 * * *",
+            "--working-directory", self.tmpdir,
+            "--run-once",
+        )
+        self.assertEqual(rc, 0, f"add failed: {stderr}")
+
+        wrapper_path = Path(self.tmpdir) / "wrappers" / "once-test.sh"
+        content = wrapper_path.read_text()
+        ulr_pos = content.index("update-last-run")
+        complete_pos = content.index('complete --id')
+        self.assertLess(ulr_pos, complete_pos,
+                        "update-last-run should appear before complete --id")
+
+    # ------------------------------------------------------------------
+    # Fix 2: timestamped result files in wrapper
+    # ------------------------------------------------------------------
+
+    def test_wrapper_uses_timestamped_result_file_default_dir(self):
+        """Default dir wrappers contain TIMESTAMP and use timestamped filenames."""
+        stdout, stderr, rc = self.add_task(task_id="ts-default")
+        self.assertEqual(rc, 0, f"add failed: {stderr}")
+
+        wrapper_path = Path(self.tmpdir) / "wrappers" / "ts-default.sh"
+        content = wrapper_path.read_text()
+        self.assertIn("TIMESTAMP=", content)
+        self.assertIn("$TASK_ID-$TIMESTAMP.md", content)
+
+    def test_wrapper_uses_stable_filename_custom_dir(self):
+        """Custom dir wrappers still use stable {id}.md filenames."""
+        custom_output = os.path.join(self.tmpdir, "custom-out")
+        stdout, stderr, rc = self.run_scheduler(
+            "add",
+            "--id", "ts-custom",
+            "--name", "TS Custom",
+            "--type", "prompt",
+            "--target", "test",
+            "--cron", "0 9 * * *",
+            "--working-directory", self.tmpdir,
+            "--output-directory", custom_output,
+        )
+        self.assertEqual(rc, 0, f"add failed: {stderr}")
+
+        wrapper_path = Path(self.tmpdir) / "wrappers" / "ts-custom.sh"
+        content = wrapper_path.read_text()
+        # Custom dir branch should use $TASK_ID.md (no timestamp)
+        self.assertIn('RESULT_FILE="$RESULT_DIR/$TASK_ID.md"', content)
+
+    # ------------------------------------------------------------------
     # Remove cleanup
     # ------------------------------------------------------------------
 

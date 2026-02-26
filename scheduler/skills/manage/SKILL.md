@@ -219,6 +219,27 @@ uv run <skill_dir>/scripts/scheduler.py logs --id "{task_id}"
 ```
 3. Display recent log entries
 
+### Operation: Cleanup
+
+Delete old log and result files to reclaim disk space:
+
+```bash
+uv run <skill_dir>/scripts/scheduler.py cleanup --max-days 30
+```
+
+The `--max-days` flag controls the retention period (default: 30 days). Log files are cleaned by modification time; result date-directories are cleaned by directory name.
+
+**Tip**: You can schedule cleanup itself as a recurring task:
+```bash
+uv run <skill_dir>/scripts/scheduler.py add \
+  --id scheduler-cleanup \
+  --name "Scheduler Cleanup" \
+  --type script \
+  --target "<skill_dir>/scripts/cleanup-wrapper.sh" \
+  --cron "0 3 * * 0" \
+  --working-directory "{cwd}"
+```
+
 ### Operation: Run Now
 
 1. Ask which task to test
@@ -261,8 +282,10 @@ uv run <skill_dir>/scripts/scheduler.py repair
 - **Working directory**: Defaults to the current project. Tasks that use marketplace skills should point to the marketplace project directory.
 - **Auth**: Works with Claude subscription login (default) or API key from Keychain (optional).
 - **Project-level storage**: By default, the scheduler stores state at `<project>/.claude/scheduler/` when run inside a project (detected via `.git` or `CLAUDE.md`). Override with the `SCHEDULER_DIR` env var or fall back to `~/.claude/scheduler/` when outside a project.
-- **Results**: Saved as markdown at `<scheduler_dir>/results/YYYY-MM-DD/{id}.md`. If `--output-directory` was specified, results go to `<output_dir>/{id}.md` (flat, no date subdirectories).
+- **Results**: Saved as markdown at `<scheduler_dir>/results/YYYY-MM-DD/{id}-HHMMSS.md` (timestamped to prevent same-day overwrites). If `--output-directory` was specified, results go to `<output_dir>/{id}.md` (stable filenames, no date subdirectories). Legacy `{id}.md` files are still found by the results command.
 - **Logs**: Saved at `<scheduler_dir>/logs/YYYY-MM-DD-{id}.log`.
+- **Cleanup**: Use `cleanup --max-days N` to delete old logs and result directories. Defaults to 30 days.
+- **Upgrading from v1.0**: Fixes in v1.1 modify the wrapper template, but existing tasks have already-generated wrappers from the old template. To apply the new template, remove and re-add tasks, or delete wrapper files from `.claude/scheduler/wrappers/` and run `repair` to regenerate them.
 
 ## Quality Checklist
 
