@@ -1,17 +1,27 @@
 ---
 name: manage
-description: Manage scheduled Claude Code tasks — add (recurring or one-off), list, pause, resume, remove, view results, and test launchd-based execution of skills, prompts, and scripts. Invoke via /schedule.
+description: Manage scheduled Claude Code tasks — add (recurring or one-off), list, pause, resume, remove, view results, and test execution of skills, prompts, and scripts. Cross-platform (macOS, Linux, Windows). Invoke via /schedule.
 ---
 
 # Scheduler
 
-Manage automated Claude Code tasks using macOS launchd. Schedule marketplace skills, freeform prompts, or shell scripts to run on a recurring cron schedule or as one-off tasks, with safety controls and desktop notifications.
+Manage automated Claude Code tasks across macOS, Linux, and Windows. Schedule marketplace skills, freeform prompts, or shell scripts to run on a recurring cron schedule or as one-off tasks, with safety controls and desktop notifications.
+
+## Platform Support
+
+| Platform | Scheduler | Notifications | API Key Storage |
+|----------|-----------|---------------|-----------------|
+| macOS | launchd (plist + launchctl) | osascript (native) | Keychain (`security` CLI) |
+| Linux | systemd user timers (.service + .timer) | notify-send (libnotify) | secret-tool (GNOME Keyring) or `~/.config/anthropic/api-key` |
+| Windows | Task Scheduler (schtasks.exe + XML) | BurntToast / Windows toast | Windows Credential Manager or `%USERPROFILE%\.config\anthropic\api-key` |
+
+The platform is auto-detected at runtime. Tasks record which platform they were created on.
 
 ## Overview
 
 This orchestrator manages the full lifecycle of scheduled tasks. It delegates all operations to `scheduler.py` and presents results conversationally.
 
-**Core Principle**: This is a thin orchestrator. All scheduling logic, file generation, and launchctl interaction are handled by `scheduler.py`. This skill manages the conversational flow only.
+**Core Principle**: This is a thin orchestrator. All scheduling logic, file generation, and platform scheduler interaction are handled by `scheduler.py` with platform-specific backends. This skill manages the conversational flow only.
 
 ## When to Use
 
@@ -23,9 +33,11 @@ Use this skill when:
 
 ## Prerequisites
 
-- macOS (uses launchd for scheduling)
+- macOS, Linux, or Windows
 - `claude` CLI in PATH (for skill and prompt tasks)
 - `uv` installed (for running scheduler.py)
+- **Linux only**: `systemctl --user` available (systemd with user session)
+- **Windows only**: PowerShell 5.1+ and Task Scheduler access
 
 ## First-Time Setup
 
@@ -189,7 +201,7 @@ uv run <skill_dir>/scripts/scheduler.py resume --id "{task_id}"
 
 1. Run `list` to show all tasks
 2. Ask which task to remove
-3. **Confirm**: "This will stop the schedule and delete the wrapper/plist. Results and logs are kept. Proceed?"
+3. **Confirm**: "This will stop the schedule and delete the wrapper and schedule artifacts. Results and logs are kept. Proceed?"
 4. Run:
 ```bash
 uv run <skill_dir>/scripts/scheduler.py remove --id "{task_id}"
@@ -277,15 +289,16 @@ uv run <skill_dir>/scripts/scheduler.py repair
 ## Notes
 
 - **One-off tasks**: Tasks created with `--run-once` auto-complete after their first successful run. They remain in the registry with status `completed` so results and logs are preserved. They can be removed later with the Remove operation.
-- **Lock file**: The wrapper uses a PID-based lock to prevent concurrent runs of the same task. If a previous run is still active, the new run is skipped.
-- **Sleep behavior**: launchd catches up one missed run on wake. If multiple intervals were missed, only one run fires.
+- **Lock file**: The wrapper uses a PID-based lock to prevent concurrent runs of the same task. If a previous run is still active, the new run is skipped. On Windows, the lock uses `Get-Process` instead of `kill -0`.
+- **Sleep/missed run behavior**: All platforms catch up on missed runs. macOS launchd fires one missed run on wake. Linux systemd timers use `Persistent=true`. Windows Task Scheduler uses `StartWhenAvailable=true`.
 - **Working directory**: Defaults to the current project. Tasks that use marketplace skills should point to the marketplace project directory.
-- **Auth**: Works with Claude subscription login (default) or API key from Keychain (optional).
+- **Auth**: Works with Claude subscription login (default) or platform-specific API key storage (macOS Keychain, Linux GNOME Keyring or file, Windows Credential Manager or file).
 - **Project-level storage**: By default, the scheduler stores state at `<project>/.claude/scheduler/` when run inside a project (detected via `.git` or `CLAUDE.md`). Override with the `SCHEDULER_DIR` env var or fall back to `~/.claude/scheduler/` when outside a project.
 - **Results**: Saved as markdown at `<scheduler_dir>/results/YYYY-MM-DD/{id}-HHMMSS.md` (timestamped to prevent same-day overwrites). If `--output-directory` was specified, results go to `<output_dir>/{id}.md` (stable filenames, no date subdirectories). Legacy `{id}.md` files are still found by the results command.
 - **Logs**: Saved at `<scheduler_dir>/logs/YYYY-MM-DD-{id}.log`.
 - **Cleanup**: Use `cleanup --max-days N` to delete old logs and result directories. Defaults to 30 days.
-- **Upgrading from v1.0**: Fixes in v1.1 modify the wrapper template, but existing tasks have already-generated wrappers from the old template. To apply the new template, remove and re-add tasks, or delete wrapper files from `.claude/scheduler/wrappers/` and run `repair` to regenerate them.
+- **Platform field**: Each task records which platform it was created on. The `repair` command can detect mismatches (e.g. a macOS task on Linux) and reinstall using the current platform's backend.
+- **Upgrading from v1**: The registry auto-migrates from v1 to v2 on first load, adding a `platform` field to existing tasks. Wrapper templates differ per platform; to apply the correct template, run `repair` or remove and re-add tasks.
 
 ## Quality Checklist
 

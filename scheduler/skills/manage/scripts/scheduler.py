@@ -3,10 +3,11 @@
 # requires-python = ">=3.10"
 # dependencies = ["croniter>=2.0.0"]
 # ///
-"""Scheduler engine — registry CRUD, wrapper/plist generation, launchctl interaction.
+"""Scheduler engine — registry CRUD, wrapper generation, platform scheduler interaction.
 
-Manages scheduled tasks for AI Launchpad via macOS LaunchAgents.
-All CRUD commands output JSON to stdout; errors go to stderr.
+Manages scheduled tasks for AI Launchpad across macOS (launchd), Linux (systemd),
+and Windows (Task Scheduler). All CRUD commands output JSON to stdout; errors go
+to stderr.
 """
 
 from __future__ import annotations
@@ -15,13 +16,15 @@ import argparse
 import json
 import os
 import re
-import subprocess
 import sys
-import textwrap
 from datetime import datetime, timezone
 from pathlib import Path
 
+# Allow imports from the backends/ package co-located with this script
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
 from croniter import croniter
+from platform_detect import detect_platform, get_backend
 
 # ---------------------------------------------------------------------------
 # Constants / paths
@@ -60,16 +63,10 @@ REGISTRY_FILE = SCHEDULER_DIR / "registry.json"
 WRAPPERS_DIR = SCHEDULER_DIR / "wrappers"
 LOGS_DIR = SCHEDULER_DIR / "logs"
 RESULTS_DIR = SCHEDULER_DIR / "results"
-PLIST_DIR = Path(os.environ.get(
-    "SCHEDULER_PLIST_DIR",
-    str(Path.home() / "Library" / "LaunchAgents")
-))
-PLIST_PREFIX = "com.ailaunchpad.scheduler"
+SCHEDULER_PY = Path(__file__).resolve()
 
-SCRIPT_DIR = Path(__file__).resolve().parent
-TEMPLATE_PATH = SCRIPT_DIR.parent / "references" / "wrapper-template.sh"
-
-SKIP_LAUNCHCTL = os.environ.get("SCHEDULER_SKIP_LAUNCHCTL", "0") == "1"
+# Platform backend (auto-detected from current OS)
+backend = get_backend()
 
 # ---------------------------------------------------------------------------
 # Registry helpers
@@ -83,12 +80,26 @@ def _ensure_dirs() -> None:
 
 
 def _load_registry() -> dict:
-    """Load the registry from disk, creating a fresh one if needed."""
+    """Load the registry from disk, creating a fresh one if needed.
+
+    Automatically migrates v1 registries to v2 (adds platform field to tasks).
+    """
     _ensure_dirs()
     if REGISTRY_FILE.exists():
         with open(REGISTRY_FILE, "r") as f:
-            return json.load(f)
-    return {"version": 1, "tasks": {}}
+            registry = json.load(f)
+
+        # Migrate v1 -> v2: add platform field to tasks that lack it
+        if registry.get("version", 1) < 2:
+            current_platform = detect_platform()
+            for task in registry.get("tasks", {}).values():
+                if "platform" not in task:
+                    task["platform"] = current_platform
+            registry["version"] = 2
+            _save_registry(registry)
+
+        return registry
+    return {"version": 2, "tasks": {}}
 
 
 def _save_registry(registry: dict) -> None:
@@ -184,222 +195,6 @@ def _expand_dow(dow_field: str) -> list[str]:
 
 
 # ---------------------------------------------------------------------------
-# Plist helpers
-# ---------------------------------------------------------------------------
-
-
-def _cron_to_calendar_interval(expr: str) -> list[dict]:
-    """Convert a 5-field cron expression to a list of StartCalendarInterval dicts.
-
-    Each dict may contain: Minute, Hour, Day, Month, Weekday.
-    Wildcard fields are omitted (meaning "every").
-    Supports step syntax (e.g. ``*/2``, ``1-30/5``) and comma-separated lists.
-    Produces the Cartesian product of all multi-value fields so that
-    launchd fires at every specified combination.
-    """
-    parts = expr.split()
-    minute, hour, dom, month, dow = parts
-
-    # Ranges used for expanding step syntax against wildcards
-    FIELD_RANGES: dict[str, tuple[int, int]] = {
-        "minute": (0, 59),
-        "hour": (0, 23),
-        "dom": (1, 31),
-        "month": (1, 12),
-        "dow": (0, 6),
-    }
-
-    def _parse_field(field: str, field_name: str) -> list[int] | None:
-        """Parse a single cron field into a sorted list of ints, or None for '*'."""
-        if field == "*":
-            return None
-        nums: list[int] = []
-        for part in field.split(","):
-            # Handle step syntax: */N or A-B/N
-            if "/" in part:
-                range_part, step_str = part.split("/", 1)
-                step = int(step_str)
-                if range_part == "*":
-                    lo, hi = FIELD_RANGES[field_name]
-                elif "-" in range_part:
-                    lo_s, hi_s = range_part.split("-", 1)
-                    lo, hi = int(lo_s), int(hi_s)
-                else:
-                    lo = int(range_part)
-                    hi = FIELD_RANGES[field_name][1]
-                nums.extend(range(lo, hi + 1, step))
-            elif "-" in part:
-                lo, hi = part.split("-", 1)
-                nums.extend(range(int(lo), int(hi) + 1))
-            else:
-                nums.append(int(part))
-        return sorted(set(nums))
-
-    minute_vals = _parse_field(minute, "minute")
-    hour_vals = _parse_field(hour, "hour")
-    dom_vals = _parse_field(dom, "dom")
-    month_vals = _parse_field(month, "month")
-    dow_vals = _parse_field(dow, "dow")
-
-    # Build the Cartesian product of all multi-value fields.
-    # Fields that are None (wildcard) are omitted from the dict, which
-    # tells launchd "every value" for that field.
-    field_specs: list[tuple[str, list[int] | None]] = [
-        ("Minute", minute_vals),
-        ("Hour", hour_vals),
-        ("Day", dom_vals),
-        ("Month", month_vals),
-        ("Weekday", dow_vals),
-    ]
-
-    intervals: list[dict] = [{}]
-    for key, vals in field_specs:
-        if vals is None:
-            continue  # wildcard — omit from dict
-        expanded: list[dict] = []
-        for existing in intervals:
-            for v in vals:
-                entry = dict(existing)
-                entry[key] = v
-                expanded.append(entry)
-        intervals = expanded
-
-    return intervals if intervals else [{}]
-
-
-def _interval_to_plist_xml(interval: dict) -> str:
-    """Render a single StartCalendarInterval dict as plist XML."""
-    lines = ["        <dict>"]
-    for key in ("Minute", "Hour", "Day", "Month", "Weekday"):
-        if key in interval:
-            lines.append(f"            <key>{key}</key>")
-            lines.append(f"            <integer>{interval[key]}</integer>")
-    lines.append("        </dict>")
-    return "\n".join(lines)
-
-
-def _generate_plist(task_id: str, wrapper_path: Path) -> Path:
-    """Generate a LaunchAgent plist for the given task and return its path."""
-    registry = _load_registry()
-    task = registry["tasks"][task_id]
-    cron_expr = task["schedule"]["cron"]
-
-    intervals = _cron_to_calendar_interval(cron_expr)
-
-    # Build StartCalendarInterval block
-    if len(intervals) == 1:
-        cal_block = f"    <key>StartCalendarInterval</key>\n{_interval_to_plist_xml(intervals[0])}"
-    else:
-        inner = "\n".join(_interval_to_plist_xml(iv) for iv in intervals)
-        cal_block = f"    <key>StartCalendarInterval</key>\n    <array>\n{inner}\n    </array>"
-
-    label = f"{PLIST_PREFIX}.{task_id}"
-    stdout_log = str(LOGS_DIR / f"{task_id}.stdout.log")
-    stderr_log = str(LOGS_DIR / f"{task_id}.stderr.log")
-
-    plist_xml = textwrap.dedent(f"""\
-        <?xml version="1.0" encoding="UTF-8"?>
-        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
-          "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-        <plist version="1.0">
-        <dict>
-            <key>Label</key>
-            <string>{label}</string>
-            <key>ProgramArguments</key>
-            <array>
-                <string>/bin/bash</string>
-                <string>{wrapper_path}</string>
-            </array>
-        {cal_block}
-            <key>StandardOutPath</key>
-            <string>{stdout_log}</string>
-            <key>StandardErrorPath</key>
-            <string>{stderr_log}</string>
-        </dict>
-        </plist>
-    """)
-
-    PLIST_DIR.mkdir(parents=True, exist_ok=True)
-    plist_path = PLIST_DIR / f"{label}.plist"
-    plist_path.write_text(plist_xml)
-    return plist_path
-
-
-# ---------------------------------------------------------------------------
-# Wrapper generation
-# ---------------------------------------------------------------------------
-
-
-def _generate_wrapper(task: dict) -> Path:
-    """Generate a bash wrapper script from the template for the given task."""
-    template = TEMPLATE_PATH.read_text()
-    # Escape single quotes in target since it's enclosed in single quotes in template
-    escaped_target = task["target"].replace("'", "'\\''")
-
-    wrapper = template.replace("{id}", task["id"])
-    wrapper = wrapper.replace("{type}", task["type"])
-    wrapper = wrapper.replace("{target}", escaped_target)
-    wrapper = wrapper.replace("{max_turns}", str(task["safety"]["max_turns"]))
-    wrapper = wrapper.replace("{timeout_minutes}", str(task["safety"]["timeout_minutes"]))
-    wrapper = wrapper.replace("{working_directory}", task["working_directory"])
-    wrapper = wrapper.replace("{run_once}", "true" if task.get("run_once") else "false")
-    wrapper = wrapper.replace("{scheduler_py}", str(Path(__file__).resolve()))
-    wrapper = wrapper.replace("{scheduler_dir}", str(SCHEDULER_DIR.resolve()))
-    wrapper = wrapper.replace("{output_directory}", task.get("output_directory") or "")
-
-    WRAPPERS_DIR.mkdir(parents=True, exist_ok=True)
-    wrapper_path = WRAPPERS_DIR / f"{task['id']}.sh"
-    wrapper_path.write_text(wrapper)
-    wrapper_path.chmod(0o755)
-    return wrapper_path
-
-
-# ---------------------------------------------------------------------------
-# Launchctl helpers
-# ---------------------------------------------------------------------------
-
-
-def _plist_path(task_id: str) -> Path:
-    """Return the plist path for a given task ID."""
-    return PLIST_DIR / f"{PLIST_PREFIX}.{task_id}.plist"
-
-
-def _launchctl_load(plist_path: Path) -> None:
-    """Load a plist via launchctl. Skipped when SCHEDULER_SKIP_LAUNCHCTL=1."""
-    if SKIP_LAUNCHCTL:
-        return
-    uid = os.getuid()
-    result = subprocess.run(
-        ["launchctl", "bootstrap", f"gui/{uid}", str(plist_path)],
-        capture_output=True, text=True,
-    )
-    if result.returncode != 0:
-        # Fallback to legacy load
-        subprocess.run(
-            ["launchctl", "load", str(plist_path)],
-            capture_output=True, text=True,
-        )
-
-
-def _launchctl_unload(plist_path: Path) -> None:
-    """Unload a plist via launchctl. Skipped when SCHEDULER_SKIP_LAUNCHCTL=1."""
-    if SKIP_LAUNCHCTL:
-        return
-    uid = os.getuid()
-    label = plist_path.stem  # e.g. com.ailaunchpad.scheduler.my-task
-    result = subprocess.run(
-        ["launchctl", "bootout", f"gui/{uid}/{label}"],
-        capture_output=True, text=True,
-    )
-    if result.returncode != 0:
-        # Fallback to legacy unload
-        subprocess.run(
-            ["launchctl", "unload", str(plist_path)],
-            capture_output=True, text=True,
-        )
-
-
-# ---------------------------------------------------------------------------
 # Commands
 # ---------------------------------------------------------------------------
 
@@ -442,6 +237,7 @@ def cmd_add(args: argparse.Namespace) -> None:
         },
         "run_once": args.run_once,
         "output_directory": output_directory,
+        "platform": detect_platform(),
         "status": "active",
         "created_at": now,
         "last_run": None,
@@ -450,10 +246,9 @@ def cmd_add(args: argparse.Namespace) -> None:
     registry["tasks"][args.id] = task
     _save_registry(registry)
 
-    # Generate wrapper and plist
-    wrapper_path = _generate_wrapper(task)
-    _generate_plist(args.id, wrapper_path)
-    _launchctl_load(_plist_path(args.id))
+    # Generate wrapper and install platform schedule
+    wrapper_path = backend.generate_wrapper(task, SCHEDULER_DIR, SCHEDULER_PY, WRAPPERS_DIR)
+    backend.install_schedule(args.id, task, wrapper_path, SCHEDULER_DIR, LOGS_DIR)
 
     print(json.dumps(task, indent=2))
 
@@ -480,14 +275,11 @@ def cmd_remove(args: argparse.Namespace) -> None:
     if args.id not in registry["tasks"]:
         _error(f"Task '{args.id}' not found.")
 
-    # Unload plist
-    plist = _plist_path(args.id)
-    if plist.exists():
-        _launchctl_unload(plist)
-        plist.unlink()
+    # Uninstall platform schedule (unload + delete artifacts)
+    backend.uninstall_schedule(args.id)
 
     # Remove wrapper
-    wrapper = WRAPPERS_DIR / f"{args.id}.sh"
+    wrapper = WRAPPERS_DIR / f"{args.id}{backend.wrapper_extension()}"
     if wrapper.exists():
         wrapper.unlink()
 
@@ -498,7 +290,7 @@ def cmd_remove(args: argparse.Namespace) -> None:
 
 
 def cmd_pause(args: argparse.Namespace) -> None:
-    """Pause a task (unload from launchctl)."""
+    """Pause a task (unload from platform scheduler)."""
     registry = _load_registry()
     if args.id not in registry["tasks"]:
         _error(f"Task '{args.id}' not found.")
@@ -506,9 +298,7 @@ def cmd_pause(args: argparse.Namespace) -> None:
     if registry["tasks"][args.id]["status"] == "paused":
         _error(f"Task '{args.id}' is already paused.")
 
-    plist = _plist_path(args.id)
-    if plist.exists():
-        _launchctl_unload(plist)
+    backend.unload_schedule(args.id)
 
     registry["tasks"][args.id]["status"] = "paused"
     _save_registry(registry)
@@ -516,7 +306,7 @@ def cmd_pause(args: argparse.Namespace) -> None:
 
 
 def cmd_resume(args: argparse.Namespace) -> None:
-    """Resume a paused task (load into launchctl)."""
+    """Resume a paused task (load into platform scheduler)."""
     registry = _load_registry()
     if args.id not in registry["tasks"]:
         _error(f"Task '{args.id}' not found.")
@@ -524,9 +314,7 @@ def cmd_resume(args: argparse.Namespace) -> None:
     if registry["tasks"][args.id]["status"] == "active":
         _error(f"Task '{args.id}' is already active.")
 
-    plist = _plist_path(args.id)
-    if plist.exists():
-        _launchctl_load(plist)
+    backend.load_schedule(args.id)
 
     registry["tasks"][args.id]["status"] = "active"
     _save_registry(registry)
@@ -534,7 +322,7 @@ def cmd_resume(args: argparse.Namespace) -> None:
 
 
 def cmd_complete(args: argparse.Namespace) -> None:
-    """Mark a task as completed and unload from launchctl.
+    """Mark a task as completed and unload from platform scheduler.
 
     Used by run-once wrappers to self-deactivate after successful execution.
     Unlike 'pause', this sets status to 'completed' to indicate the task
@@ -544,9 +332,7 @@ def cmd_complete(args: argparse.Namespace) -> None:
     if args.id not in registry["tasks"]:
         _error(f"Task '{args.id}' not found.")
 
-    plist = _plist_path(args.id)
-    if plist.exists():
-        _launchctl_unload(plist)
+    backend.unload_schedule(args.id)
 
     registry["tasks"][args.id]["status"] = "completed"
     _save_registry(registry)
@@ -559,15 +345,12 @@ def cmd_run(args: argparse.Namespace) -> None:
     if args.id not in registry["tasks"]:
         _error(f"Task '{args.id}' not found.")
 
-    wrapper = WRAPPERS_DIR / f"{args.id}.sh"
+    wrapper = WRAPPERS_DIR / f"{args.id}{backend.wrapper_extension()}"
     if not wrapper.exists():
         _error(f"Wrapper script not found for task '{args.id}'. Run 'repair' first.")
 
-    result = subprocess.run(
-        ["/bin/bash", str(wrapper)],
-        capture_output=False,
-    )
-    sys.exit(result.returncode)
+    exit_code = backend.run_wrapper(wrapper)
+    sys.exit(exit_code)
 
 
 def cmd_logs(args: argparse.Namespace) -> None:
@@ -653,7 +436,7 @@ def cmd_update_last_run(args: argparse.Namespace) -> None:
 
 
 def cmd_repair(args: argparse.Namespace) -> None:
-    """Regenerate missing wrapper scripts and plist files for active tasks."""
+    """Regenerate missing wrapper scripts and schedule artifacts for active tasks."""
     registry = _load_registry()
     issues_fixed = 0
 
@@ -661,18 +444,16 @@ def cmd_repair(args: argparse.Namespace) -> None:
         if task["status"] != "active":
             continue
 
-        wrapper_path = WRAPPERS_DIR / f"{task_id}.sh"
-        plist = _plist_path(task_id)
+        wrapper_path = WRAPPERS_DIR / f"{task_id}{backend.wrapper_extension()}"
 
         if not wrapper_path.exists():
-            _generate_wrapper(task)
+            backend.generate_wrapper(task, SCHEDULER_DIR, SCHEDULER_PY, WRAPPERS_DIR)
             print(f"Regenerated wrapper for '{task_id}'")
             issues_fixed += 1
 
-        if not plist.exists():
-            _generate_plist(task_id, wrapper_path)
-            _launchctl_load(plist)
-            print(f"Regenerated plist for '{task_id}'")
+        if not backend.schedule_artifact_exists(task_id):
+            backend.install_schedule(task_id, task, wrapper_path, SCHEDULER_DIR, LOGS_DIR)
+            print(f"Regenerated schedule for '{task_id}'")
             issues_fixed += 1
 
     if issues_fixed > 0:
@@ -802,7 +583,7 @@ def main() -> None:
     p_ulr.set_defaults(func=cmd_update_last_run)
 
     # --- repair ---
-    p_repair = subparsers.add_parser("repair", help="Regenerate missing wrappers/plists")
+    p_repair = subparsers.add_parser("repair", help="Regenerate missing wrappers and schedules")
     p_repair.set_defaults(func=cmd_repair)
 
     # --- cleanup ---
