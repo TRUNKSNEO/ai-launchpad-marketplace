@@ -210,6 +210,78 @@ Every generated idea must pass this checklist before inclusion. If an idea fails
 
 Run each idea through all seven criteria in order. If an idea fails criterion 1 (standalone value), there's no point checking the rest — it needs rework or removal. The criteria are ordered by importance: standalone value and specificity are non-negotiable; engagement angle is the final polish check.
 
+### Quality Benchmark — What Passing Ideas Become
+
+These are real high-engagement notes from the wild. Use them to calibrate what "passes" the quality checklist when it becomes a finished note. If an idea couldn't plausibly produce something at this level, it's not ready.
+
+**Standalone value + Specificity (criteria 1 & 2):**
+```
+80% of hospital bills have errors.
+
+One family uploaded theirs to ChatGPT. Found duplicate charges, wrong codes, double billing on a $200K bill. Got it down to $33K.
+
+3 steps:
+1. Upload your itemized bill to ChatGPT, Claude, or Gemini. Ask it to flag errors.
+2. Have it write dispute letters citing the No Surprises Act.
+3. Ask for a hardship letter requesting a reduction.
+
+Hospitals negotiate with insurance daily. They'll negotiate with you too.
+```
+*Calibration:* Specific stat, specific dollar amounts, specific steps, specific legal reference. An idea pitch like "AI can help with medical bills" would fail specificity — "AI found $167K in errors on a $200K hospital bill using 3 steps" passes.
+
+**One idea per note (criterion 3):**
+```
+Some people use AI to think better.
+
+Some use it to avoid thinking.
+```
+*Calibration:* One idea, one contrast. No second point, no tangent. If an idea needs "and" to describe it, split it.
+
+**Clear engagement angle (criterion 6):**
+```
+Everyone's debating which AI tool is best.
+
+Meanwhile, someone with zero technical skills just built the thing you've been "planning" for six months.
+
+AI doesn't care about your credentials. It doesn't care about your experience. It cares about one thing — did you show up and try?
+
+The most dangerous person in any room right now is the one who refuses to be stopped.
+
+Not the most skilled. The most agentic.
+```
+*Calibration:* Makes the reader feel called out, creates a "do I agree?" reaction, coins a memorable term. An idea should have a clear reason someone would restack, reply, or screenshot it.
+
+**Conversion potential (criterion 7):**
+```
+If you're a solopreneur, stop using AI to write.
+
+Use AI to decide.
+
+Every week, run these three prompts:
+1. "Turn my last 10 posts into a list of the beliefs I'm teaching."
+2. "Which belief is most likely to produce a paid subscriber? Why?"
+3. "What paid benefit would accelerate that belief into action?"
+
+Most creators build offers like fortune tellers.
+
+AI lets you build like an analyst.
+```
+*Calibration:* Copy-paste-ready prompts the reader can use immediately. High-converter ideas give the reader something they can do right now — and make them think "I need more of this."
+
+**Pattern recognition as authority (criteria 2 & 6):**
+```
+Prompt engineering: how do I talk to AI?
+
+Context engineering: what does AI need to know?
+
+Intent engineering: what does AI need to want?
+
+We're still stuck on the first, but agents need the third figured out before they start.
+```
+*Calibration:* Parallel structure builds a framework, punchline reframes everything. An idea at this level gives the reader a new mental model they didn't have before.
+
+Use these benchmarks during Step 6 (quality filtering). If an idea couldn't realistically produce a note at this quality level, rework the pitch to sharpen the angle — or discard the idea entirely.
+
 ---
 
 ## Trending Topic Integration

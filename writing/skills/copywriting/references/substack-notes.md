@@ -420,6 +420,220 @@ Your energy determines your results more than your effort.
 
 ---
 
+## Golden Examples — Real High-Engagement Notes
+
+Real-world notes from creators with proven engagement. These demonstrate how the structural formulas manifest in practice. Study the rhythm, specificity, and emotional hooks — not just the structure.
+
+### Single-Punch Wisdom
+
+**Julia Diez:**
+```
+Some people use AI to think better.
+
+Some use it to avoid thinking.
+```
+*Why it works:* Two sentences. Sharp contrast. Forces the reader to self-identify. Maximum shareability — this is a screenshot note.
+
+**Pascal Biese:**
+```
+A strong claude.md will outperform 90% of the unnecessarily complex setups you see people sharing online.
+```
+*Why it works:* One sentence with a specific claim (90%) that challenges the trend of over-engineering. Niche enough to feel insider, broad enough to resonate.
+
+### Pattern Observation
+
+**Daria Cupareanu:**
+```
+Prompt engineering: how do I talk to AI?
+
+Context engineering: what does AI need to know?
+
+Intent engineering: what does AI need to want?
+
+We're still stuck on the first, but agents need the third figured out before they start.
+```
+*Why it works:* Clean parallel structure builds a framework, then the punchline reframes everything. The reader walks away with a mental model they didn't have before.
+
+**Max Bernstein:**
+```
+I repeat...
+
+You are not behind.
+
+Yet.
+
+"A recent global snapshot of AI usage highlights just how early adoption still is. Around 84% of the world's population has never used AI at all, while roughly 16% have used free AI tools. Only a small fraction — about 0.3% — pay for AI services, and an even smaller share, around 0.04%, use it for more advanced tasks like coding."
+```
+*Why it works:* "Yet." is doing all the heavy lifting — one word creates urgency from what starts as reassurance. Data block provides credibility. Readers share this to reassure themselves.
+
+### Contrarian Statement
+
+**Wyndo:**
+```
+Everyone's debating which AI tool is best.
+
+Meanwhile, someone with zero technical skills just built the thing you've been "planning" for six months.
+
+AI doesn't care about your credentials. It doesn't care about your experience. It cares about one thing — did you show up and try?
+
+The most dangerous person in any room right now is the one who refuses to be stopped.
+
+Not the most skilled. The most agentic.
+```
+*Why it works:* Opens by dismissing a common debate, then makes the reader feel called out ("planning" in quotes). Builds tension through repetition ("doesn't care... doesn't care...") and lands on a coined term ("most agentic") that's screenshot-worthy.
+
+**Daria Cupareanu:**
+```
+The best AI users I've seen are stubborn about what they want to achieve but flexible about how they get there.
+
+The tool changes. The workflow changes. The approach changes. The goal stays fixed.
+
+Most people do the opposite. They cling to the method even when a better one appears.
+```
+*Why it works:* Thesis → Evidence → Flip. The repeated sentence structure ("The X changes.") creates rhythm, and "Most people do the opposite" makes the reader evaluate their own behavior.
+
+### Problem → Solution
+
+**Sabrina Ramonov:**
+```
+80% of hospital bills have errors.
+
+One family uploaded theirs to ChatGPT. Found duplicate charges, wrong codes, double billing on a $200K bill. Got it down to $33K.
+
+3 steps:
+
+1. Upload your itemized bill to ChatGPT, Claude, or Gemini. Ask it to flag errors.
+2. Have it write dispute letters citing the No Surprises Act.
+3. Ask for a hardship letter requesting a reduction.
+
+Hospitals negotiate with insurance daily. They'll negotiate with you too.
+```
+*Why it works:* Shocking stat hook → proof it works with specific numbers → actionable steps anyone can follow → empowering closer. This is the formula: data + story + steps + encouragement.
+
+**Sabrina Ramonov:**
+```
+I found a free alternative to Claude Code and Cursor.
+
+It's called OpenCode. Over 100,000 stars on GitHub.
+
+You connect it to local open source models. No token costs. No monthly subscription.
+
+It writes code, builds apps, connects MCP servers.
+
+If you're paying $20/month for AI coding tools, you don't have to.
+```
+*Why it works:* Opens with a discovery (positions the writer as a scout). Each line adds one layer of value. Ends by directly addressing the reader's wallet. Simple, specific, immediately useful.
+
+### Direct Advice
+
+**Wyndo:**
+```
+New prompt I use before any big decision:
+
+"What would I need to believe for the opposite choice to be obviously correct?"
+
+It doesn't make me change my mind.
+
+But it forces me to understand what I'm actually betting on.
+```
+*Why it works:* Gives you one tool, explains what it does, explains what it doesn't do. The quoted prompt is copy-paste ready — readers can use it immediately.
+
+**Wyndo:**
+```
+The prompting pattern for learning anything faster:
+
+"Teach me the 20% of this subject that explains 80% of what matters."
+
+Then:
+
+"What are the most common misconceptions about that 20%?"
+
+Start with the 20% that frames the story, and let the remaining 80% fill in the meaning.
+```
+*Why it works:* Two copy-paste-ready prompts with a framework for why they work. The "then" creates a sequence that feels like a system, not just a tip.
+
+**Carrie Loranger:**
+```
+If you're a solopreneur, stop using AI to write.
+
+Use AI to decide.
+
+Every week, run these three prompts:
+
+1. "Turn my last 10 posts into a list of the beliefs I'm teaching."
+2. "Which belief is most likely to produce a paid subscriber? Why?"
+3. "What paid benefit would accelerate that belief into action? Calls, lives, chats, or a group coaching sprint?"
+
+Most creators build offers like fortune tellers.
+
+AI lets you build like an analyst.
+```
+*Why it works:* Contrarian open ("stop using AI to write") grabs attention, then the three prompts are immediately actionable. The closing metaphor (fortune tellers vs. analyst) is quotable and memorable.
+
+**Claudia Ng:**
+```
+Most people never finish a side project because they're waiting for a 4-hour block of "deep work" that never comes.
+
+My advice: Stop trying to finish the system. Just work on it for 45 minutes.
+
+Open the repo. Rename one variable. Write one SQL query.
+
+If you do that, you've won for the day.
+```
+*Why it works:* Identifies a feeling everyone has, then gives permission to do less. The specific actions ("rename one variable") make it concrete. "You've won for the day" is encouraging without being cheesy.
+
+### Income Proof Story
+
+**Sabrina Ramonov:**
+```
+I added up my software subscriptions last year. Over $10,000.
+
+Then I replaced them with free AI tools.
+
+LM Studio and Ollama run AI models locally. No ChatGPT fees. NotebookLM handles research for free. Voiceinc is a one-time purchase. No monthly fees. n8n self-hosted replaced my $1,300/month AI support agent. Took 2 hours. Free vibe coding tools are still in public preview. Alibaba's model, FramePack, and LTX do video locally with a GPU.
+
+6 tools. $0/month.
+```
+*Why it works:* Specific dollar amount hook → list of alternatives with enough detail to act on → punchy closer. The contrast between $10,000 and $0/month is the entire note in two numbers.
+
+### List-Based Tactical
+
+**Sabrina Ramonov:**
+```
+Everyone's selling $5K-$20K courses on AI agents right now.
+
+You don't need them.
+
+I put together a list of 5 YouTube channels teaching AI agents and automations for free.
+
+Nate Herk (the n8n guy) has an 8-hour no-code course. n8n's own channel has quick start tutorials. Robo Nuggets covers AI automations for content creation. Jack Roberts teaches n8n + agentic coding tools.
+
+And I dropped a free n8n course on my channel too.
+
+Start with any of these before you spend a dollar on a paid course.
+```
+*Why it works:* Generosity variant — positions against paid alternatives, delivers free value. Names specific creators (builds community). Includes her own content without making the note about it.
+
+### Build-in-Public Update
+
+**Artem Zhutov:**
+```
+New video — I run Claude Code inside NotebookLM and it changed how I do research.
+
+I had 20 YouTube videos to go through. Instead of watching them all, I pointed one terminal command at them. NotebookLM read everything, Claude Code pulled it all back into Obsidian as a knowledge graph — sources, topics, citations linked together with deep links to exactly which video said what.
+```
+*Why it works:* Opens with the result, then explains the process with enough specificity to understand the workflow. "20 YouTube videos" and "one terminal command" create a vivid before/after contrast.
+
+### Thought Partnership (Cross-Type)
+
+**Alex Poulin:**
+```
+Using AI as a thought partner without weakening your thinking isn't just about prompts. It's about a second technology: pen and paper. High brain integration needs generation, planning, recall — multiple modes at once. When you mind-map your prompt inputs and the AI outputs, you externalize the parts and make relationships visible. You stop treating responses as paragraphs and start treating them as systems. That's how you stay the thinker while AI stays the tool.
+```
+*Why it works:* Unexpected pairing (AI + pen and paper) creates curiosity. Dense with insight but reads as one continuous thought. Final line is a clean philosophical statement that reframes the reader's relationship with AI.
+
+---
+
 ## Common Mistakes
 
 - Using Notes as a pure link dump ("New issue is up! [link]") — always lead with a standalone insight.
