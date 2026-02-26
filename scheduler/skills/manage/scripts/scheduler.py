@@ -27,7 +27,35 @@ from croniter import croniter
 # Constants / paths
 # ---------------------------------------------------------------------------
 
-SCHEDULER_DIR = Path(os.environ.get("SCHEDULER_DIR", str(Path.home() / ".claude" / "scheduler")))
+
+def _find_project_root() -> Path | None:
+    """Walk up from CWD looking for .git or CLAUDE.md to find a project root."""
+    current = Path.cwd()
+    for directory in [current, *current.parents]:
+        if (directory / ".git").exists() or (directory / "CLAUDE.md").exists():
+            return directory
+    return None
+
+
+def _resolve_scheduler_dir() -> Path:
+    """Resolve the scheduler directory with priority:
+
+    1. SCHEDULER_DIR env var (explicit override)
+    2. <project_root>/.claude/scheduler/ if a project root is found
+    3. ~/.claude/scheduler/ fallback
+    """
+    env_dir = os.environ.get("SCHEDULER_DIR")
+    if env_dir:
+        return Path(env_dir)
+
+    project_root = _find_project_root()
+    if project_root:
+        return project_root / ".claude" / "scheduler"
+
+    return Path.home() / ".claude" / "scheduler"
+
+
+SCHEDULER_DIR = _resolve_scheduler_dir()
 REGISTRY_FILE = SCHEDULER_DIR / "registry.json"
 WRAPPERS_DIR = SCHEDULER_DIR / "wrappers"
 LOGS_DIR = SCHEDULER_DIR / "logs"
@@ -310,6 +338,8 @@ def _generate_wrapper(task: dict) -> Path:
     wrapper = wrapper.replace("{working_directory}", task["working_directory"])
     wrapper = wrapper.replace("{run_once}", "true" if task.get("run_once") else "false")
     wrapper = wrapper.replace("{scheduler_py}", str(Path(__file__).resolve()))
+    wrapper = wrapper.replace("{scheduler_dir}", str(SCHEDULER_DIR.resolve()))
+    wrapper = wrapper.replace("{output_directory}", task.get("output_directory") or "")
 
     WRAPPERS_DIR.mkdir(parents=True, exist_ok=True)
     wrapper_path = WRAPPERS_DIR / f"{task['id']}.sh"
@@ -385,6 +415,11 @@ def cmd_add(args: argparse.Namespace) -> None:
 
     now = datetime.now(timezone.utc).isoformat()
 
+    # Resolve output_directory to absolute path if provided
+    output_directory = None
+    if args.output_directory:
+        output_directory = str(Path(args.output_directory).expanduser().resolve())
+
     task = {
         "id": args.id,
         "name": args.name,
@@ -400,6 +435,7 @@ def cmd_add(args: argparse.Namespace) -> None:
             "timeout_minutes": args.timeout_minutes,
         },
         "run_once": args.run_once,
+        "output_directory": output_directory,
         "status": "active",
         "created_at": now,
         "last_run": None,
@@ -549,10 +585,23 @@ def cmd_logs(args: argparse.Namespace) -> None:
 def cmd_results(args: argparse.Namespace) -> None:
     """Show result files for a task."""
     registry = _load_registry()
-    if args.id not in registry["tasks"]:
+    task = registry["tasks"].get(args.id)
+    if task is None:
         _error(f"Task '{args.id}' not found.")
 
-    # Find result files matching {id}.md in any date subdirectory
+    # If task has a custom output_directory, look there (flat, no date subdirs)
+    custom_dir = task.get("output_directory")
+    if custom_dir:
+        custom_result = Path(custom_dir) / f"{args.id}.md"
+        if custom_result.exists():
+            print(f"=== {custom_result} ===")
+            print(custom_result.read_text())
+            return
+        else:
+            print(f"No result files found for task '{args.id}'.", file=sys.stderr)
+            return
+
+    # Default: find result files matching {id}.md in any date subdirectory
     result_files = sorted(RESULTS_DIR.glob(f"*/{args.id}.md"), reverse=True)
 
     if not result_files:
@@ -648,6 +697,8 @@ def main() -> None:
                        help="Timeout in minutes (default: 15)")
     p_add.add_argument("--run-once", action="store_true", default=False,
                        help="Run once then auto-complete (one-off task)")
+    p_add.add_argument("--output-directory", default=None,
+                       help="Custom directory for task result files")
     p_add.set_defaults(func=cmd_add)
 
     # --- list ---

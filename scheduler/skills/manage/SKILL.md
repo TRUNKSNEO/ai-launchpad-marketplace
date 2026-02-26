@@ -37,13 +37,13 @@ claude -p "hello" --max-turns 1 --output-format text
 
 If this fails, guide the user to run `claude login` before proceeding.
 
-Also check if the scheduler directory exists:
+Also check if the scheduler directory exists. The scheduler uses project-level storage by default — it looks for `.git` or `CLAUDE.md` to find the project root, then stores state at `<project>/.claude/scheduler/`:
 
 ```bash
-ls ~/.claude/scheduler/registry.json
+ls .claude/scheduler/registry.json
 ```
 
-If it does not exist, the first `add` command will create it automatically. No manual setup needed.
+If it does not exist, the first `add` command will create it automatically. No manual setup needed. You can override the location with the `SCHEDULER_DIR` environment variable, or fall back to `~/.claude/scheduler/` when outside a project.
 
 ## Workflow
 
@@ -98,6 +98,10 @@ Confirm with the user:
 Ask: "Safety limits? Defaults are max 20 turns, 15 minute timeout."
 Let user accept defaults or customize.
 
+**Step 6a: Output directory (optional)**
+Ask: "Want results saved to a specific directory? Default is the scheduler's results folder."
+If the user provides a path, it will be resolved to an absolute path and used as the flat output directory (no date subdirectories). If skipped, results go to `<scheduler_dir>/results/YYYY-MM-DD/{id}.md`.
+
 **Step 7: Confirm and create**
 Present a summary table:
 
@@ -112,6 +116,7 @@ Present a summary table:
 | Max turns | 20 |
 | Timeout | 15 min |
 | Working dir | {current project directory} |
+| Output dir | (default) |
 
 Ask: "Create this task?"
 
@@ -128,7 +133,7 @@ uv run <skill_dir>/scripts/scheduler.py add \
   --working-directory "{cwd}"
 ```
 
-For one-off tasks, add the `--run-once` flag:
+For one-off tasks, add the `--run-once` flag. You can also specify `--output-directory` to save results to a custom location:
 ```bash
 uv run <skill_dir>/scripts/scheduler.py add \
   --id "morning-news-pulse" \
@@ -139,6 +144,7 @@ uv run <skill_dir>/scripts/scheduler.py add \
   --max-turns 20 \
   --timeout-minutes 15 \
   --run-once \
+  --output-directory "/path/to/output" \
   --working-directory "{cwd}"
 ```
 
@@ -254,8 +260,9 @@ uv run <skill_dir>/scripts/scheduler.py repair
 - **Sleep behavior**: launchd catches up one missed run on wake. If multiple intervals were missed, only one run fires.
 - **Working directory**: Defaults to the current project. Tasks that use marketplace skills should point to the marketplace project directory.
 - **Auth**: Works with Claude subscription login (default) or API key from Keychain (optional).
-- **Results**: Saved as markdown at `~/.claude/scheduler/results/YYYY-MM-DD/{id}.md`.
-- **Logs**: Saved at `~/.claude/scheduler/logs/YYYY-MM-DD-{id}.log`.
+- **Project-level storage**: By default, the scheduler stores state at `<project>/.claude/scheduler/` when run inside a project (detected via `.git` or `CLAUDE.md`). Override with the `SCHEDULER_DIR` env var or fall back to `~/.claude/scheduler/` when outside a project.
+- **Results**: Saved as markdown at `<scheduler_dir>/results/YYYY-MM-DD/{id}.md`. If `--output-directory` was specified, results go to `<output_dir>/{id}.md` (flat, no date subdirectories).
+- **Logs**: Saved at `<scheduler_dir>/logs/YYYY-MM-DD-{id}.log`.
 
 ## Quality Checklist
 

@@ -21,11 +21,18 @@ if [ -n "$API_KEY" ]; then
 fi
 
 # --- Paths ---
+SCHEDULER_DIR="{scheduler_dir}"
+OUTPUT_DIR="{output_directory}"
+
 DATE=$(date '+%Y-%m-%d')
-RESULT_DIR="$HOME/.claude/scheduler/results/$DATE"
-LOG_FILE="$HOME/.claude/scheduler/logs/$DATE-$TASK_ID.log"
+if [ -n "$OUTPUT_DIR" ]; then
+  RESULT_DIR="$OUTPUT_DIR"
+else
+  RESULT_DIR="$SCHEDULER_DIR/results/$DATE"
+fi
+LOG_FILE="$SCHEDULER_DIR/logs/$DATE-$TASK_ID.log"
 RESULT_FILE="$RESULT_DIR/$TASK_ID.md"
-LOCK_FILE="$HOME/.claude/scheduler/.lock-$TASK_ID"
+LOCK_FILE="$SCHEDULER_DIR/.lock-$TASK_ID"
 mkdir -p "$RESULT_DIR" "$(dirname "$LOG_FILE")"
 
 # --- Lock: skip if already running ---

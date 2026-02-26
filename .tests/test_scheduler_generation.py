@@ -177,6 +177,82 @@ class TestSchedulerGeneration(unittest.TestCase):
             self.assertIn(f"<integer>{day}</integer>", content)
 
     # ------------------------------------------------------------------
+    # Wrapper path injection tests
+    # ------------------------------------------------------------------
+
+    def test_wrapper_contains_baked_scheduler_dir(self):
+        """Wrapper script has SCHEDULER_DIR set to the resolved path, not $HOME."""
+        stdout, stderr, rc = self.add_task(task_id="path-test")
+        self.assertEqual(rc, 0, f"add failed: {stderr}")
+
+        wrapper_path = Path(self.tmpdir) / "wrappers" / "path-test.sh"
+        content = wrapper_path.read_text()
+        # Should contain the baked-in SCHEDULER_DIR (the resolved tmpdir)
+        resolved_tmpdir = str(Path(self.tmpdir).resolve())
+        self.assertIn(f'SCHEDULER_DIR="{resolved_tmpdir}', content)
+        # Should NOT contain the old hardcoded $HOME path
+        self.assertNotIn('$HOME/.claude/scheduler', content)
+
+    def test_wrapper_contains_empty_output_dir_by_default(self):
+        """Wrapper has OUTPUT_DIR="" when no output directory is specified."""
+        stdout, stderr, rc = self.add_task(task_id="no-outdir")
+        self.assertEqual(rc, 0, f"add failed: {stderr}")
+
+        wrapper_path = Path(self.tmpdir) / "wrappers" / "no-outdir.sh"
+        content = wrapper_path.read_text()
+        self.assertIn('OUTPUT_DIR=""', content)
+
+    def test_wrapper_contains_custom_output_dir(self):
+        """Wrapper has OUTPUT_DIR set when --output-directory is provided."""
+        # Use a path inside tmpdir to avoid macOS symlink resolution issues
+        custom_output = os.path.join(self.tmpdir, "my-output")
+        stdout, stderr, rc = self.run_scheduler(
+            "add",
+            "--id", "custom-outdir",
+            "--name", "Custom Output",
+            "--type", "prompt",
+            "--target", "test",
+            "--cron", "0 9 * * *",
+            "--working-directory", self.tmpdir,
+            "--output-directory", custom_output,
+        )
+        self.assertEqual(rc, 0, f"add failed: {stderr}")
+
+        wrapper_path = Path(self.tmpdir) / "wrappers" / "custom-outdir.sh"
+        content = wrapper_path.read_text()
+        resolved_output = str(Path(custom_output).resolve())
+        self.assertIn(f'OUTPUT_DIR="{resolved_output}"', content)
+
+    def test_task_json_includes_output_directory(self):
+        """Task JSON includes output_directory field when provided."""
+        custom_output = os.path.join(self.tmpdir, "test-output")
+        stdout, stderr, rc = self.run_scheduler(
+            "add",
+            "--id", "json-outdir",
+            "--name", "JSON Output Dir",
+            "--type", "prompt",
+            "--target", "test",
+            "--cron", "0 9 * * *",
+            "--working-directory", self.tmpdir,
+            "--output-directory", custom_output,
+        )
+        self.assertEqual(rc, 0, f"add failed: {stderr}")
+
+        import json
+        task = json.loads(stdout)
+        resolved_output = str(Path(custom_output).resolve())
+        self.assertEqual(task["output_directory"], resolved_output)
+
+    def test_task_json_output_directory_none_when_not_provided(self):
+        """Task JSON has output_directory=None when not provided."""
+        stdout, stderr, rc = self.add_task(task_id="no-outdir-json")
+        self.assertEqual(rc, 0, f"add failed: {stderr}")
+
+        import json
+        task = json.loads(stdout)
+        self.assertIsNone(task["output_directory"])
+
+    # ------------------------------------------------------------------
     # Remove cleanup
     # ------------------------------------------------------------------
 
