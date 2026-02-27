@@ -15,7 +15,7 @@ PERMISSION_MODE='{permission_mode}'
 SKIP_PERMISSIONS='{skip_permissions}'
 
 # --- Environment ---
-export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+export PATH="$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
 
 # Optional: load API key if available (not required for subscription auth)
 API_KEY="$(security find-generic-password -s 'anthropic-api-key' -w 2>/dev/null || echo '')"
