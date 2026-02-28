@@ -29,7 +29,7 @@ The platform is auto-detected at runtime. Each task records which platform it wa
 
 ### manage
 
-Conversational orchestrator for scheduling tasks. Invoke via `/schedule`.
+Conversational orchestrator for scheduling tasks. Invoke via `/manage` (or `/scheduler:manage`).
 
 **Operations:**
 - Add a new scheduled task (skill, prompt, or script)
@@ -40,6 +40,8 @@ Conversational orchestrator for scheduling tasks. Invoke via `/schedule`.
 - View logs for a task
 - Run a task now (test)
 - Cleanup old logs and results
+
+**Example:** "Schedule a task every day at 9am that summarizes my emails based on priority."
 
 ## How It Works
 

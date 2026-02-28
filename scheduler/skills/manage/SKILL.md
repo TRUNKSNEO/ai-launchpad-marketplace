@@ -1,6 +1,6 @@
 ---
 name: manage
-description: Manage scheduled Claude Code tasks — add (recurring or one-off), list, pause, resume, remove, view results, and test execution of skills, prompts, and scripts. Cross-platform (macOS, Linux, Windows). Invoke via /schedule.
+description: Manage scheduled Claude Code tasks — add (recurring or one-off), list, pause, resume, remove, view results, and test execution of skills, prompts, and scripts. Cross-platform (macOS, Linux, Windows). Invoke via /manage.
 ---
 
 # Scheduler
@@ -59,7 +59,7 @@ If it does not exist, the first `add` command will create it automatically. No m
 
 ## Workflow
 
-When the user invokes `/schedule`, present the operation menu:
+When the user invokes `/manage`, present the operation menu:
 
 1. **Add** a new scheduled task
 2. **List** all scheduled tasks
