@@ -36,6 +36,7 @@ Individual plugins may have additional requirements — refer to each plugin's R
 | [Branding Kit](./branding-kit) | Design systems and brand guidelines |
 | [Research](./research) | Web research and competitor analysis |
 | [Agent Teams](./agent-teams) | Agent team session viewing and analysis |
+| [Scheduler](./scheduler) | Cross-platform scheduled automation — recurring skills, prompts, and scripts |
 | [Skill Forge](./skill-forge) | Full skill lifecycle — create, integrate, and improve skills |
 
 ## Author

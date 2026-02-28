@@ -1,7 +1,7 @@
 {
 "name": "research",
-"description": "A plugin to add research capabilities to Claude Code",
-"version": "1.0.1",
+"description": "A plugin for web research and comprehensive competitor analysis — market positioning, SWOT, competitive matrix, and strategic recommendations",
+"version": "1.0.2",
 "author": {
 "name": "Kenny Liao (The AI Launchpad)",
 "url": "https://www.youtube.com/@KennethLiao"

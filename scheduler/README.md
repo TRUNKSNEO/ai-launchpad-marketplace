@@ -2,6 +2,19 @@
 
 Schedule automated Claude Code tasks across macOS, Linux, and Windows. Manage recurring execution of marketplace skills, freeform prompts, and shell scripts with safety controls and desktop notifications.
 
+## Prerequisites
+
+- AI Launchpad marketplace added — see [main README](../README.md)
+- `uv` for running the Python engine
+
+## Installation
+
+```
+/plugin install scheduler@ai-launchpad-marketplace
+```
+
+Restart Claude Code for the changes to take effect.
+
 ## Platform Support
 
 | Platform | Scheduler Backend | Artifacts |
@@ -26,6 +39,7 @@ Conversational orchestrator for scheduling tasks. Invoke via `/schedule`.
 - View results from a task
 - View logs for a task
 - Run a task now (test)
+- Cleanup old logs and results
 
 ## How It Works
 
@@ -54,4 +68,3 @@ scheduler/skills/manage/scripts/
 
 - macOS, Linux, or Windows
 - Claude Code CLI (`claude` in PATH)
-- `uv` for running the Python engine

@@ -6,6 +6,8 @@ Foundation plugin for creating visual assets — thumbnails, cover images, socia
 
 - AI Launchpad marketplace added — see [main README](../README.md)
 - `art` plugin installed (uses `art:nanobanana` for image generation)
+- `branding-kit` plugin installed (required by `newsletter-visuals` for design system)
+- `youtube` plugin installed (optional — `thumbnail` uses the Thumbnail Reviewer agent)
 
 ## Installation
 

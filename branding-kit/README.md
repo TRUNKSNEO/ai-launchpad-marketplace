@@ -5,6 +5,7 @@ Create and manage visual design systems and brand guidelines. Define brand aesth
 ## Prerequisites
 
 - AI Launchpad marketplace added — see [main README](../README.md)
+- `art` plugin installed (required by `design-system` for style board generation)
 
 ## Installation
 
