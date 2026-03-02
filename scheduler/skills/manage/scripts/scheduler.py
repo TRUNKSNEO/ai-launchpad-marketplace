@@ -415,16 +415,35 @@ def cmd_logs(args: argparse.Namespace) -> None:
     if args.id not in registry["tasks"]:
         _error(f"Task '{args.id}' not found.")
 
-    # Find log files matching *-{id}.log
-    log_files = sorted(LOGS_DIR.glob(f"*-{args.id}.log"), reverse=True)[:3]
+    # Search date-organized logs: logs/YYYY-MM-DD/{id}.log
+    date_logs = list(LOGS_DIR.glob(f"*/{args.id}.log"))
+    # Backward compat: also search flat logs: logs/YYYY-MM-DD-{id}.log
+    flat_logs = list(LOGS_DIR.glob(f"*-{args.id}.log"))
+    # Deduplicate and sort by parent dir name (date) descending
+    all_logs = sorted(
+        set(date_logs + flat_logs),
+        key=lambda p: p.parent.name if p.parent != LOGS_DIR else p.name[:10],
+        reverse=True,
+    )[:3]
 
-    if not log_files:
+    if not all_logs:
         print(f"No log files found for task '{args.id}'.", file=sys.stderr)
         return
 
-    for log_file in log_files:
-        print(f"\n=== {log_file.name} ===")
+    for log_file in all_logs:
+        # Show relative path for clarity
+        if log_file.parent != LOGS_DIR:
+            label = f"{log_file.parent.name}/{log_file.name}"
+        else:
+            label = log_file.name
+        print(f"\n=== {label} ===")
         print(log_file.read_text())
+
+    # Show session log path if available in last_run
+    task = registry["tasks"][args.id]
+    session_log = task.get("last_run", {}).get("session_log")
+    if session_log:
+        print(f"\n--- Session log (latest run): {session_log}")
 
 
 def cmd_results(args: argparse.Namespace) -> None:
@@ -481,6 +500,9 @@ def cmd_update_last_run(args: argparse.Namespace) -> None:
         "result_file": args.result_file,
     }
 
+    if args.session_log:
+        last_run["session_log"] = args.session_log
+
     registry["tasks"][args.id]["last_run"] = last_run
 
     # Set status to error if exit code is non-zero
@@ -535,8 +557,20 @@ def cmd_cleanup(args: argparse.Namespace) -> None:
     deleted_logs = 0
     deleted_results = 0
 
-    # Clean log files by mtime
     if LOGS_DIR.exists():
+        # Clean date-organized log directories: logs/YYYY-MM-DD/
+        for date_dir in LOGS_DIR.iterdir():
+            if date_dir.is_dir():
+                try:
+                    dir_date = datetime.strptime(date_dir.name, "%Y-%m-%d")
+                    if dir_date.timestamp() < cutoff:
+                        log_count = sum(1 for _ in date_dir.glob("*.log"))
+                        shutil.rmtree(date_dir)
+                        deleted_logs += log_count
+                except ValueError:
+                    continue  # Skip non-date directories
+
+        # Backward compat: clean flat log files by mtime
         for log_file in LOGS_DIR.glob("*.log"):
             if log_file.stat().st_mtime < cutoff:
                 log_file.unlink()
@@ -651,6 +685,7 @@ def main() -> None:
     p_ulr.add_argument("--exit-code", type=int, required=True, help="Exit code")
     p_ulr.add_argument("--duration", type=int, required=True, help="Duration in seconds")
     p_ulr.add_argument("--result-file", required=True, help="Path to result file")
+    p_ulr.add_argument("--session-log", default=None, help="Path to Claude Code JSONL session log")
     p_ulr.set_defaults(func=cmd_update_last_run)
 
     # --- repair ---
