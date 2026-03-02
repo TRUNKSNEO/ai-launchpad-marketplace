@@ -50,8 +50,8 @@ Conversational orchestrator for scheduling tasks. Invoke via `/manage` (or `/sch
 3. Each task gets a platform-native schedule artifact (plist, systemd units, or Task Scheduler entry)
 4. The platform scheduler fires the wrapper at the scheduled time
 5. The wrapper runs `claude -p` (for skills/prompts) or `bash`/PowerShell (for scripts)
-6. Results saved to `<scheduler_dir>/results/YYYY-MM-DD/{id}-HHMMSS.md`
-7. Logs saved to `<scheduler_dir>/logs/YYYY-MM-DD/{id}.log`
+6. Results saved to `<scheduler_dir>/results/{id}/YYYY-MM-DD/{id}-HHMMSS.md`
+7. Logs saved to `<scheduler_dir>/logs/{id}/YYYY-MM-DD.log`
 8. Claude Code JSONL session log path captured in the registry (for skill/prompt tasks)
 9. Desktop notification on completion or failure
 

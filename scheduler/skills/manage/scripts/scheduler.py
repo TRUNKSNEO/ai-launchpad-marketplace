@@ -415,26 +415,33 @@ def cmd_logs(args: argparse.Namespace) -> None:
     if args.id not in registry["tasks"]:
         _error(f"Task '{args.id}' not found.")
 
-    # Search date-organized logs: logs/YYYY-MM-DD/{id}.log
-    date_logs = list(LOGS_DIR.glob(f"*/{args.id}.log"))
-    # Backward compat: also search flat logs: logs/YYYY-MM-DD-{id}.log
+    # Search task-first logs: logs/{id}/YYYY-MM-DD.log
+    task_dir_logs = sorted(
+        (LOGS_DIR / args.id).glob("*.log"), reverse=True
+    ) if (LOGS_DIR / args.id).is_dir() else []
+    # Backward compat: date-first logs: logs/YYYY-MM-DD/{id}.log
+    date_dir_logs = list(LOGS_DIR.glob(f"*/{args.id}.log"))
+    # Backward compat: flat logs: logs/YYYY-MM-DD-{id}.log
     flat_logs = list(LOGS_DIR.glob(f"*-{args.id}.log"))
-    # Sort by date descending (date-dir logs and flat logs cannot overlap)
-    all_logs = sorted(
-        date_logs + flat_logs,
-        key=lambda p: p.parent.name if p.parent != LOGS_DIR else p.name[:10],  # flat: YYYY-MM-DD-{id}.log
-        reverse=True,
-    )[:3]
+    # Combine, deduplicate by resolved path, sort by name/date descending
+    seen = set()
+    all_logs = []
+    for log_file in task_dir_logs + sorted(date_dir_logs + flat_logs, reverse=True):
+        resolved = log_file.resolve()
+        if resolved not in seen:
+            seen.add(resolved)
+            all_logs.append(log_file)
+    all_logs = all_logs[:3]
 
     if not all_logs:
         print(f"No log files found for task '{args.id}'.", file=sys.stderr)
         return
 
     for log_file in all_logs:
-        # Show relative path for clarity
-        if log_file.parent != LOGS_DIR:
-            label = f"{log_file.parent.name}/{log_file.name}"
-        else:
+        # Show relative path from logs dir for clarity
+        try:
+            label = str(log_file.relative_to(LOGS_DIR))
+        except ValueError:
             label = log_file.name
         print(f"\n=== {label} ===")
         print(log_file.read_text())
@@ -467,11 +474,23 @@ def cmd_results(args: argparse.Namespace) -> None:
             print(f"No result files found for task '{args.id}'.", file=sys.stderr)
             return
 
-    # Default: find result files matching {id}.md or {id}-HHMMSS.md in any date subdirectory
+    # Search task-first results: results/{id}/YYYY-MM-DD/{id}-HHMMSS.md
+    task_results = sorted(
+        (RESULTS_DIR / args.id).glob(f"*/{args.id}-[0-9]*.md"),
+        key=lambda p: (p.parent.name, p.name), reverse=True,
+    ) if (RESULTS_DIR / args.id).is_dir() else []
+    # Backward compat: date-first results: results/YYYY-MM-DD/{id}.md or {id}-HHMMSS.md
     legacy = list(RESULTS_DIR.glob(f"*/{args.id}.md"))
     timestamped = list(RESULTS_DIR.glob(f"*/{args.id}-[0-9]*.md"))
-    result_files = sorted(set(legacy + timestamped),
-                          key=lambda p: (p.parent.name, p.name), reverse=True)
+    # Combine, deduplicate by resolved path
+    seen = set()
+    result_files = []
+    for rf in task_results + sorted(set(legacy + timestamped),
+                                     key=lambda p: (p.parent.name, p.name), reverse=True):
+        resolved = rf.resolve()
+        if resolved not in seen:
+            seen.add(resolved)
+            result_files.append(rf)
 
     if not result_files:
         print(f"No result files found for task '{args.id}'.", file=sys.stderr)
@@ -479,11 +498,19 @@ def cmd_results(args: argparse.Namespace) -> None:
 
     if args.all:
         for rf in result_files:
-            print(f"\n=== {rf.parent.name}/{rf.name} ===")
+            try:
+                label = str(rf.relative_to(RESULTS_DIR))
+            except ValueError:
+                label = rf.name
+            print(f"\n=== {label} ===")
             print(rf.read_text())
     else:
         latest = result_files[0]
-        print(f"=== {latest.parent.name}/{latest.name} ===")
+        try:
+            label = str(latest.relative_to(RESULTS_DIR))
+        except ValueError:
+            label = latest.name
+        print(f"=== {label} ===")
         print(latest.read_text())
 
 
@@ -559,38 +586,57 @@ def cmd_cleanup(args: argparse.Namespace) -> None:
     deleted_logs = 0
     deleted_results = 0
 
-    if LOGS_DIR.exists():
-        # Clean date-organized log directories: logs/YYYY-MM-DD/
-        for date_dir in LOGS_DIR.iterdir():
-            if date_dir.is_dir():
+    def _cleanup_date_entries(base_dir: Path, extension: str) -> int:
+        """Clean up date-named files/dirs older than cutoff within a directory.
+
+        Handles both task-first layout ({id}/YYYY-MM-DD.log or {id}/YYYY-MM-DD/)
+        and legacy date-first layout (YYYY-MM-DD/ or YYYY-MM-DD-{id}.ext).
+        """
+        count = 0
+        if not base_dir.exists():
+            return count
+
+        for entry in base_dir.iterdir():
+            if entry.is_dir():
+                # Could be a task-first dir ({id}/) or a legacy date dir (YYYY-MM-DD/)
                 try:
-                    dir_date = datetime.strptime(date_dir.name, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+                    # Legacy: date-first directory
+                    dir_date = datetime.strptime(entry.name, "%Y-%m-%d").replace(tzinfo=timezone.utc)
                     if dir_date.timestamp() < cutoff:
-                        log_count = sum(1 for _ in date_dir.glob("*.log"))
-                        shutil.rmtree(date_dir)
-                        deleted_logs += log_count
+                        count += sum(1 for _ in entry.rglob(f"*{extension}"))
+                        shutil.rmtree(entry)
                 except ValueError:
-                    continue  # Skip non-date directories
+                    # Task-first directory — recurse into it to clean date entries
+                    for sub in entry.iterdir():
+                        if sub.is_dir():
+                            try:
+                                sub_date = datetime.strptime(sub.name, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+                                if sub_date.timestamp() < cutoff:
+                                    count += sum(1 for _ in sub.rglob(f"*{extension}"))
+                                    shutil.rmtree(sub)
+                            except ValueError:
+                                continue
+                        elif sub.is_file() and sub.suffix == extension:
+                            # Task-first: logs/{id}/YYYY-MM-DD.log
+                            try:
+                                file_date = datetime.strptime(sub.stem, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+                                if file_date.timestamp() < cutoff:
+                                    sub.unlink()
+                                    count += 1
+                            except ValueError:
+                                continue
+                    # Remove task dir if now empty
+                    if entry.is_dir() and not any(entry.iterdir()):
+                        entry.rmdir()
+            elif entry.is_file() and entry.suffix == extension:
+                # Legacy: flat files (logs/YYYY-MM-DD-{id}.log)
+                if entry.stat().st_mtime < cutoff:
+                    entry.unlink()
+                    count += 1
+        return count
 
-        # Backward compat: clean flat log files by mtime
-        for log_file in LOGS_DIR.glob("*.log"):
-            if log_file.stat().st_mtime < cutoff:
-                log_file.unlink()
-                deleted_logs += 1
-
-    # Clean default result date-directories by directory name
-    if RESULTS_DIR.exists():
-        for date_dir in RESULTS_DIR.iterdir():
-            if not date_dir.is_dir():
-                continue
-            try:
-                dir_date = datetime.strptime(date_dir.name, "%Y-%m-%d")
-                if dir_date.timestamp() < cutoff:
-                    result_count = sum(1 for _ in date_dir.glob("*.md"))
-                    shutil.rmtree(date_dir)
-                    deleted_results += result_count
-            except ValueError:
-                continue  # Skip non-date directories
+    deleted_logs = _cleanup_date_entries(LOGS_DIR, ".log")
+    deleted_results = _cleanup_date_entries(RESULTS_DIR, ".md")
 
     print(json.dumps({
         "deleted_logs": deleted_logs,

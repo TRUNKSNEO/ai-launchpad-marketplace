@@ -54,10 +54,10 @@ if ($OUTPUT_DIR) {
     $RESULT_DIR = $OUTPUT_DIR
     $RESULT_FILE = Join-Path $RESULT_DIR "$TASK_ID.md"
 } else {
-    $RESULT_DIR = Join-Path $SCHEDULER_DIR "results\$DATE"
+    $RESULT_DIR = Join-Path $SCHEDULER_DIR "results\$TASK_ID\$DATE"
     $RESULT_FILE = Join-Path $RESULT_DIR "$TASK_ID-$TIMESTAMP.md"
 }
-$LOG_FILE = Join-Path $SCHEDULER_DIR "logs\$DATE\$TASK_ID.log"
+$LOG_FILE = Join-Path $SCHEDULER_DIR "logs\$TASK_ID\$DATE.log"
 $LOCK_FILE = Join-Path $SCHEDULER_DIR ".lock-$TASK_ID"
 
 # Create directories
