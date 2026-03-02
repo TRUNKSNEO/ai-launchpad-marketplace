@@ -39,6 +39,23 @@ Individual plugins may have additional requirements — refer to each plugin's R
 | [Scheduler](./scheduler) | Cross-platform scheduled automation — recurring skills, prompts, and scripts |
 | [Skill Forge](./skill-forge) | Full skill lifecycle — create, integrate, and improve skills |
 
+## Keeping Plugins Updated
+
+By default, third-party marketplaces do **not** auto-update. Enable it so new plugins and updates arrive automatically:
+
+1. Run `/plugin` to open the plugin manager.
+2. Navigate to **Marketplaces**, select this marketplace.
+3. Choose **Enable auto-update**.
+
+Once enabled, Claude Code refreshes the marketplace and updates installed plugins at startup.
+
+**Manual updates:**
+
+```
+/plugin marketplace update ai-launchpad-marketplace   # update all plugins
+/plugin update plugin-name                             # update a single plugin
+```
+
 ## Author
 
 **Kenny Liao (The AI Launchpad)**
