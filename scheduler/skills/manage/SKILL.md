@@ -277,13 +277,47 @@ uv run <skill_dir>/scripts/scheduler.py add \
 
 ### Operation: Run Now
 
-1. Ask which task to test
-2. Warn: "This runs the task immediately in the foreground. It will use your Claude session."
-3. Run:
+**Important**: `scheduler.py run` spawns `claude -p` as a subprocess, which fails inside an active Claude Code session ("cannot be launched inside another Claude Code session"). Since users typically invoke this skill from within Claude Code, use the deferred scheduling approach instead.
+
+**Procedure:**
+
+1. Ask which task to test.
+
+2. Read the registry to save the task's current cron schedule:
 ```bash
-uv run <skill_dir>/scripts/scheduler.py run --id "{task_id}"
+uv run <skill_dir>/scripts/scheduler.py get --id "{task_id}"
 ```
-4. Show output as it streams
+Note the current `cron` value.
+
+3. Compute a cron expression for ~2 minutes from now (e.g., if current time is 10:03, use `5 10 {day} {month} *`). Include the day and month to avoid the task firing again on subsequent days.
+
+4. Pause the task, edit the cron in the registry, and reload:
+```bash
+uv run <skill_dir>/scripts/scheduler.py pause --id "{task_id}"
+```
+Then edit `.claude/scheduler/registry.json` directly — find the task by ID and change its `cron` field to the near-future expression. Then resume:
+```bash
+uv run <skill_dir>/scripts/scheduler.py resume --id "{task_id}"
+```
+Finally, regenerate the wrapper and schedule with the new cron:
+```bash
+uv run <skill_dir>/scripts/scheduler.py repair --force
+```
+
+5. Tell the user: "Task rescheduled to run in ~2 minutes. Waiting for it to fire..."
+
+6. Poll for the result every 30 seconds (up to the task's timeout + 2 minutes):
+```bash
+uv run <skill_dir>/scripts/scheduler.py results --id "{task_id}"
+```
+Compare timestamps to confirm a new result appeared after the reschedule.
+
+7. Once the result appears (or timeout), restore the original cron. Edit `.claude/scheduler/registry.json` to set the `cron` field back to the original value, then reload:
+```bash
+uv run <skill_dir>/scripts/scheduler.py repair --force
+```
+
+8. Show the result output to the user and confirm the original schedule is restored.
 
 ## Cron Expression Reference
 
