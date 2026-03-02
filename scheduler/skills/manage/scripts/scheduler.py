@@ -419,10 +419,10 @@ def cmd_logs(args: argparse.Namespace) -> None:
     date_logs = list(LOGS_DIR.glob(f"*/{args.id}.log"))
     # Backward compat: also search flat logs: logs/YYYY-MM-DD-{id}.log
     flat_logs = list(LOGS_DIR.glob(f"*-{args.id}.log"))
-    # Deduplicate and sort by parent dir name (date) descending
+    # Sort by date descending (date-dir logs and flat logs cannot overlap)
     all_logs = sorted(
-        set(date_logs + flat_logs),
-        key=lambda p: p.parent.name if p.parent != LOGS_DIR else p.name[:10],
+        date_logs + flat_logs,
+        key=lambda p: p.parent.name if p.parent != LOGS_DIR else p.name[:10],  # flat: YYYY-MM-DD-{id}.log
         reverse=True,
     )[:3]
 
@@ -443,7 +443,9 @@ def cmd_logs(args: argparse.Namespace) -> None:
     task = registry["tasks"][args.id]
     session_log = task.get("last_run", {}).get("session_log")
     if session_log:
-        print(f"\n--- Session log (latest run): {session_log}")
+        exists_note = "" if Path(session_log).exists() else " (file not found)"
+        print(f"\n=== Session log (latest run){exists_note} ===")
+        print(session_log)
 
 
 def cmd_results(args: argparse.Namespace) -> None:
@@ -562,7 +564,7 @@ def cmd_cleanup(args: argparse.Namespace) -> None:
         for date_dir in LOGS_DIR.iterdir():
             if date_dir.is_dir():
                 try:
-                    dir_date = datetime.strptime(date_dir.name, "%Y-%m-%d")
+                    dir_date = datetime.strptime(date_dir.name, "%Y-%m-%d").replace(tzinfo=timezone.utc)
                     if dir_date.timestamp() < cutoff:
                         log_count = sum(1 for _ in date_dir.glob("*.log"))
                         shutil.rmtree(date_dir)
