@@ -15,6 +15,7 @@ PERMISSION_MODE='{permission_mode}'
 SKIP_PERMISSIONS='{skip_permissions}'
 
 # --- Environment ---
+unset CLAUDECODE  # Prevent Claude Code from detecting a nested session and auto-creating worktrees
 export PATH="$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
 
 # Optional: load API key if available (not required for subscription auth)
