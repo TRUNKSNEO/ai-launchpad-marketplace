@@ -30,7 +30,7 @@ Before generating titles, determine the content type and load the appropriate pl
 | Newsletter / email | `references/newsletter-subject-lines.md` | Open rate, preview text, inbox competition |
 | Social media post | `references/social-headlines.md` | Scroll-stopping, platform-specific hooks |
 
-**MANDATORY**: Read the relevant reference file before generating titles. These references contain platform-specific patterns, forbidden patterns, and quality standards that are non-negotiable.
+**Essential**: Read the relevant reference file before generating titles — each platform has unique patterns and constraints that directly affect performance, and skipping this step leads to generic titles that underperform.
 
 If the content type does not match any reference file, apply the universal principles below and adapt to the format.
 
@@ -67,7 +67,7 @@ To create an optimized title, I need to understand:
 
 ### Step 2: Load Platform Reference
 
-**MANDATORY ACTION**: Read the appropriate platform-specific reference file based on the content type identified in Step 1.
+**Read the appropriate platform-specific reference file** based on the content type identified in Step 1.
 
 ### Step 3: Identify the Question
 
@@ -152,7 +152,7 @@ When creating assets for The AI Launchpad, invoke `creator-stack:brand-guideline
 
 ### Rejection Criteria
 
-**REJECT and regenerate if the title:**
+**Regenerate if the title:**
 - Merely describes the content without sparking curiosity
 - Duplicates text that appears on the visual asset
 - Answers the question instead of raising it

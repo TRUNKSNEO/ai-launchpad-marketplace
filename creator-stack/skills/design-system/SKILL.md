@@ -215,12 +215,12 @@ Generate 8 style board elements using the **creator-stack:nanobanana** skill. Bu
 
 **Prompt construction rules:**
 - Write as descriptive narrative paragraphs (NOT keyword lists)
-- Always specify background color by name AND hex code
-- Always describe the line/stroke style explicitly
-- Always constrain accent color usage ("the only color in the entire image")
-- Always end with format/aspect ratio
-- Include explicit exclusions ("No text, no gradients, no other colors")
-- Reference the artistic tool metaphor from the design system (brush pen, marker, pencil, etc.)
+- Specify background color by name AND hex code — AI generators interpret "white" differently, but `#FFFFFF` is unambiguous
+- Describe the line/stroke style explicitly — without this, models default to their own aesthetic and you lose style consistency across the 8 elements
+- Constrain accent color usage ("the only color in the entire image") — unconstrained color leads to palette drift that compounds across the series
+- End with format/aspect ratio — placing dimensions last ensures the model treats them as hard constraints rather than suggestions
+- Include explicit exclusions ("No text, no gradients, no other colors") — models add elements opportunistically unless told not to
+- Reference the artistic tool metaphor from the design system (brush pen, marker, pencil, etc.) — tool metaphors anchor the rendering style more reliably than abstract adjectives like "clean" or "bold"
 
 **Naming convention for generated files:**
 ```

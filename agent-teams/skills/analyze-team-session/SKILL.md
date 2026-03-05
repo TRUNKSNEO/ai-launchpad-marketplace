@@ -16,6 +16,8 @@ Analyze an agent team session export against the official Claude Code agent team
 - User wants to know if a task was a good fit for agent teams
 - After running an agent team, to identify what to do differently next time
 
+**Prerequisite**: This skill requires a markdown session export. Use the `agent-teams:view-team-session` skill to generate one from a session ID.
+
 Do NOT use for:
 - Analyzing solo (non-team) Claude Code sessions
 - General Claude Code usage advice unrelated to agent teams

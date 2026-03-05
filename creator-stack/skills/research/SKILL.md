@@ -31,6 +31,11 @@ This skill is designed to work across platforms. Orchestrator skills may provide
 | Social Media | Platform analytics, engagement data | Web search |
 | General | N/A | Web search (default) |
 
+Platform-specific research strategies are available in the references/ directory:
+- `references/research-frameworks.md` — General research frameworks
+- `references/substack-notes-strategy.md` — Substack Notes strategy
+- `references/youtube-community-strategy.md` — YouTube community strategy
+
 When no platform-specific tools are available, use web search as a general-purpose research tool to find existing content, competitor analysis, and trending topics.
 
 ## Research Subagents

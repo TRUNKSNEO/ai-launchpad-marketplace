@@ -7,6 +7,8 @@ description: Apply Kenny Liao's authentic writing voice to any written content. 
 
 Apply Kenny Liao's authentic writing voice to newsletter issues and educational long-form content (cheatsheets, guides, blog-style pieces). Works for both drafting from scratch and polishing rough drafts.
 
+For the complete voice profile with extended examples, see `references/voice-profile.md`.
+
 ## How Other Skills Should Invoke This Skill
 
 This is a PERSONALITY skill. Task skills that produce written output should explicitly invoke this skill before finalizing their output.

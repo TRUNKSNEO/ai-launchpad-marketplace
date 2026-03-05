@@ -81,13 +81,13 @@ For other brands, check if a brand guidelines skill exists at `~/.claude/skills/
 
 ### Generating Thumbnail Concepts
 
-Once you have generated an initial thumbnail concept or prompt, you **MUST** use the `Thumbnail Reviewer` agent to review the concept and provide feedback. The reviewer will provide a critique and suggest improvements. Consider the reviewer's feedback and incorporate it before proceeding. **DO NOT** go through the generate-review-regenerate loop more than **ONCE**.
+Once you have generated an initial thumbnail concept or prompt, use the `Thumbnail Reviewer` agent to review the concept and provide feedback. The reviewer will provide a critique and suggest improvements. Consider the reviewer's feedback and incorporate it before proceeding. Limit the generate-review-regenerate loop to a single pass — additional iterations yield diminishing returns and the reviewer's first critique captures the most impactful changes.
 
 ### Optimizing Thumbnails
 
 Because `creator-stack:nanobanana` supports image editing, you can iteratively modify and improve a previously generated thumbnail. Pass the original thumbnail as a reference image and describe the desired changes.
 
-Always review generated thumbnails to ensure they meet the complete design formulas and original intent. If not, you can iterate by editing the original thumbnail. **DO NOT** go through the generate-review-regenerate loop more than **ONCE**.
+Always review generated thumbnails to ensure they meet the complete design formulas and original intent. If not, you can iterate by editing the original thumbnail. Limit the generate-review-regenerate loop to a single pass — additional iterations yield diminishing returns and the reviewer's first critique captures the most impactful changes.
 
 ## User Assets
 

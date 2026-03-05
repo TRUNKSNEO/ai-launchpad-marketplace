@@ -9,7 +9,7 @@ description: Create retention-optimized opening hooks for any content type. Exte
 
 This skill provides concrete requirements and proven patterns for creating opening hooks that retain audience attention, extend title/headline curiosity, and maximize engagement. The opening content is critical for retention across all platforms — video, email, and social.
 
-**Core Principle**: The opening must EXTEND the curiosity created by the title/headline, not repeat or waste it. The audience already engaged based on the title's promise. The opening must ADD new intrigue and make them MORE interested.
+**Core Principle**: The opening works best when it extends the curiosity created by the title/headline rather than repeating or wasting it. Because the audience already engaged based on the title's promise, attention momentum is at its peak — the opening should add new intrigue and make them even more interested.
 
 ## When to Use
 
@@ -30,15 +30,15 @@ Before creating hooks, determine the content type and load the appropriate platf
 | Newsletter | `references/newsletter-hooks.md` | First paragraph / preview text |
 | Social post | `references/social-hooks.md` | First line / hook tweet |
 
-**MANDATORY**: Read the relevant reference file before creating hooks. These references contain platform-specific patterns, timing requirements, and forbidden patterns.
+**Essential**: Read the relevant reference file before creating hooks — these references contain platform-specific patterns, timing requirements, and patterns to avoid that directly affect retention.
 
 If the content type does not match any reference file, apply the universal principles below and adapt to the format.
 
-## Critical Requirements
+## Core Requirements
 
-### 1. Curiosity Extension (CRITICAL)
+### 1. Curiosity Extension
 
-Opening content MUST build upon the intrigue from the title/headline, never repeat it.
+The opening works best when it builds upon the intrigue from the title/headline rather than repeating it.
 
 **CORRECT Example:**
 - Title: "Teach Your Cat 5 Tricks in 10 Minutes"
@@ -50,37 +50,37 @@ Opening content MUST build upon the intrigue from the title/headline, never repe
 - Opening: "Today we're going to look at 5 tricks you can teach your cat in 10 minutes"
 - Audience thinks: "I know. Get on with it."
 
-The opening must make the audience MORE interested than when they engaged. Attention must INCREASE, not drain.
+The opening should make the audience more interested than when they engaged. Attention should increase, not drain.
 
-### 2. Direct Content Connection (MANDATORY)
+### 2. Direct Content Connection
 
-Opening content MUST directly relate to the title/headline promise.
+Essential: Opening content should directly relate to the title/headline promise, because any disconnect breaks the trust that brought the audience in.
 
-**Rules:**
-- NO unrelated tangents or side stories in the opening
-- NO delayed starts where main content appears much later
-- Content must be tightly connected to the promised value
-- If additional context is needed, it must come AFTER the hook is established
+**Guidelines:**
+- Avoid unrelated tangents or side stories in the opening
+- Avoid delayed starts where main content appears much later
+- Keep content tightly connected to the promised value
+- If additional context is needed, introduce it after the hook is established
 
-### 3. Forbidden Opening Patterns
+### 3. Patterns to Avoid
 
-These patterns are DISQUALIFYING violations across all content types:
+These patterns consistently fail because each one drains the attention momentum the title created:
 
-#### 3.1 DO NOT Repeat the Title (FORBIDDEN)
+#### 3.1 Repeating the Title
 
-Never restate what the title already communicated. The audience already has this information. Repetition drains attention.
+Avoid restating what the title already communicated. The audience already has this information — repetition signals that the content won't offer anything new, and attention drops.
 
-#### 3.2 DO NOT Greet Before Hooking (FORBIDDEN)
+#### 3.2 Greeting Before Hooking
 
-Never start with greetings, welcomes, or introductions before the hook. Greetings are acceptable AFTER the initial hook is established.
+Avoid starting with greetings, welcomes, or introductions before the hook. Greetings are fine after the initial hook is established, but leading with them delays the payoff.
 
 - Bad: "Hi everyone, welcome back..."
 - Bad: "Hey what's up, thanks for clicking..."
 - Bad: "In this issue, we'll cover..."
 
-#### 3.3 DO NOT Start with Unrelated Content (FORBIDDEN)
+#### 3.3 Starting with Unrelated Content
 
-Never open with tangents, stories, or content disconnected from the title/headline promise. Audience confusion triggers abandonment.
+Avoid opening with tangents, stories, or content disconnected from the title/headline promise. Audience confusion triggers abandonment — they came for a specific promise and need immediate confirmation they're in the right place.
 
 ## Effective Opening Hook Patterns
 
@@ -131,7 +131,7 @@ When creating or reviewing opening hooks, follow this workflow:
 3. **Choose hook pattern** — Which structure (A/B/C/D) best serves the content?
 4. **Draft opening content** — Create the opening section
 5. **Apply verification checklist** — Ensure all requirements are met
-6. **Test against forbidden patterns** — Ensure none of the 3 forbidden patterns are present
+6. **Test against failure patterns** — Ensure none of the 3 common failure patterns are present
 
 ## Voice Application
 
@@ -146,10 +146,10 @@ When creating assets for The AI Launchpad, invoke `creator-stack:brand-guideline
 Before finalizing any opening hook, verify ALL of these:
 
 - [ ] **Non-Repetition Test**: Does this opening avoid repeating the title? (Must be YES)
-- [ ] **Curiosity Extension Test**: Does this make the audience MORE curious than the title alone?
+- [ ] **Curiosity Extension Test**: Does this make the audience more curious than the title alone?
 - [ ] **Direct Connection Test**: Is this immediately related to what the title promised?
 - [ ] **No Greeting First Test**: Does this avoid greetings before the hook? (Must be YES)
-- [ ] **Attention Increase Test**: Will this INCREASE audience attention, not drain it?
+- [ ] **Attention Increase Test**: Will this increase audience attention, not drain it?
 - [ ] **Engagement Validation Test**: Does this confirm the audience made the right choice engaging?
 - [ ] **Platform Timing Test**: Does this meet the platform-specific timing/length requirements?
 
@@ -183,13 +183,13 @@ Bad: "Before we get started, let me explain why this is
 ```
 **Problem**: Delays the payoff. Audience loses patience.
 
-## Critical Success Factors
+## Success Priorities
 
 **Priority Order (highest to lowest):**
-1. DO NOT repeat the title (instant failure if violated)
-2. Extend curiosity beyond the title/headline
+1. Extend curiosity — don't repeat the title (repetition is the most common reason hooks fail)
+2. Add intrigue beyond the title/headline
 3. Connect directly to promised content
-4. DO NOT greet before hooking
+4. Hook before greeting — save introductions for after the hook lands
 5. Meet platform-specific timing/length requirements
 
-**CRITICAL**: If the opening repeats the title, greets before hooking, or starts with unrelated content, the hook has FAILED regardless of other qualities. These are disqualifying violations.
+The strongest hooks avoid these three patterns because each one drains the attention the title created: repeating the title, greeting before hooking, or starting with unrelated content. Regenerate if any of these are present, regardless of other qualities.

@@ -281,7 +281,7 @@ for i, subject in enumerate(subjects):
         series_paths.append(result["path"])
 ```
 
-The full sequential generation patterns are documented in the [Sequential Generation](#sequential-generation) section above.
+The full sequential generation patterns are documented in the [Sequential Generation](#sequential-generation) section below.
 
 ## Environment Variables
 
