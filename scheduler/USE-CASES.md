@@ -11,9 +11,9 @@ Fill your idea bank on autopilot so you never start from zero.
 | Automation | Schedule | What It Does | Type |
 |---|---|---|---|
 | **Daily AI News Brief** | Daily 7am | Researches latest AI news, filters for your audience's interests, saves a curated brief | `prompt` |
-| **Weekly YouTube Competitor Scan** | Mon 8am | Scans competitor AI education channels for new videos, trending topics, content gaps | `skill` — youtube:youtube-data + research prompt |
-| **Weekly Substack Note Ideas** | Mon 8am | Mines published videos, newsletters, and web trends for note-worthy angles | `skill` — substack:generate-note-ideas |
-| **YouTube Comment Mining** | Weekly | Extracts content ideas, questions, and pain points from recent video comments | `skill` — youtube:youtube-data + prompt |
+| **Weekly YouTube Competitor Scan** | Mon 8am | Scans competitor AI education channels for new videos, trending topics, content gaps | `skill` — creator-stack:youtube-data + research prompt |
+| **Weekly Substack Note Ideas** | Mon 8am | Mines published videos, newsletters, and web trends for note-worthy angles | `skill` — creator-stack:generate-note-ideas |
+| **YouTube Comment Mining** | Weekly | Extracts content ideas, questions, and pain points from recent video comments | `skill` — creator-stack:youtube-data + prompt |
 | **Monthly Content Calendar Seed** | 1st of month | Generates a draft content calendar pulling from all accumulated research | `prompt` |
 
 **Value**: Wake up Monday morning with fresh ideas, competitor intel, and audience questions already waiting in markdown files.
@@ -26,9 +26,9 @@ Get something to *edit* instead of something to *write*.
 
 | Automation | Trigger | What It Does | Type |
 |---|---|---|---|
-| **Newsletter First Draft** | Thu morning (before Tue publish) | Pulls from weekly research + recent video and generates a draft newsletter issue | `skill` — substack:plan-issue or writing:copywriting |
+| **Newsletter First Draft** | Thu morning (before Tue publish) | Pulls from weekly research + recent video and generates a draft newsletter issue | `skill` — creator-stack:plan-issue or creator-stack:copywriting |
 | **Video Description Generator** | One-off after each upload | Generates optimized title, description, tags, and timestamps for a published video | `prompt` |
-| **YouTube Script Outline** | One-off | Given a topic, generates a structured script outline with hooks, key points, and CTA | `skill` — youtube:plan-video |
+| **YouTube Script Outline** | One-off | Given a topic, generates a structured script outline with hooks, key points, and CTA | `skill` — creator-stack:plan-video |
 
 **Value**: The hardest part of content creation is the blank page. These make sure you always start at draft v1, not draft v0.
 
@@ -40,11 +40,11 @@ One piece of content becomes five.
 
 | Automation | Trigger | Input -> Output | Type |
 |---|---|---|---|
-| **Video -> Newsletter** | After video publish | YouTube video -> newsletter issue draft | `skill` — youtube:repurpose-video |
-| **Video -> Community Post** | After video publish | YouTube video -> community post promoting the video | `skill` — youtube:create-post |
-| **Newsletter -> Substack Note** | After newsletter publish | Newsletter issue -> promotional Substack Note | `skill` — substack:create-note |
-| **Newsletter -> Video Outline** | On demand | High-performing newsletter -> YouTube video outline | `skill` — youtube:newsletter-to-video |
-| **Video -> Social Posts** | After video publish | YouTube video -> multi-platform social copy | `skill` — youtube:repurpose-video |
+| **Video -> Newsletter** | After video publish | YouTube video -> newsletter issue draft | `skill` — creator-stack:repurpose-video |
+| **Video -> Community Post** | After video publish | YouTube video -> community post promoting the video | `skill` — creator-stack:create-post |
+| **Newsletter -> Substack Note** | After newsletter publish | Newsletter issue -> promotional Substack Note | `skill` — creator-stack:create-note |
+| **Newsletter -> Video Outline** | On demand | High-performing newsletter -> YouTube video outline | `skill` — creator-stack:newsletter-to-video |
+| **Video -> Social Posts** | After video publish | YouTube video -> multi-platform social copy | `skill` — creator-stack:repurpose-video |
 
 **Value**: Skills for most of this pipeline already exist. The scheduler turns them from "things you remember to run" into "things that happen automatically."
 
@@ -56,7 +56,7 @@ Stay informed without checking dashboards.
 
 | Automation | Schedule | What It Does | Type |
 |---|---|---|---|
-| **Weekly YouTube Analytics Brief** | Mon 9am | Channel performance summary — views, subs, top videos, growth trends | `skill` — youtube:youtube-data + prompt |
+| **Weekly YouTube Analytics Brief** | Mon 9am | Channel performance summary — views, subs, top videos, growth trends | `skill` — creator-stack:youtube-data + prompt |
 | **Email Triage** | Daily 8am | Categorizes and summarizes overnight emails by priority | `skill` — gmail-email-categorization |
 | **Competitor Product Watch** | Weekly | Tracks competitor AI tools/products relevant to Basis and EQL Ivy | `prompt` — web research |
 | **EQL Ivy Health Check** | Daily | Hits API endpoints, verifies Render deployment is healthy | `script` — bash curl checks |

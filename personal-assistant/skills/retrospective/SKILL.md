@@ -163,10 +163,9 @@ If no friction was found: report "Clean session — nothing to capture" and exit
 ## Relationship to Other Meta Skills
 
 ```
-skill-forge:create-skill     → Creates new skills (blueprint)
-skill-creator:skill-creator    → Guides skill creation (assistant)
-superpowers:writing-skills     → Tests and deploys skills (TDD)
-skill-forge:retrospective  → Identifies what needs improving (feedback loop)
+skill-creator:skill-creator         → Guides skill creation (assistant)
+superpowers:writing-skills          → Tests and deploys skills (TDD)
+personal-assistant:retrospective    → Identifies what needs improving (feedback loop)
 ```
 
 This skill completes the skill lifecycle: create → test → deploy → observe → improve.

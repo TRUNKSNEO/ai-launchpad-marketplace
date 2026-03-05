@@ -82,7 +82,7 @@ Generate a slug ID from the name (e.g., "Weekly note ideas" → `weekly-note-ide
 
 **Step 2: Task type**
 Ask: "What type of task?"
-- **Skill** — invoke a marketplace skill (e.g., `substack:generate-note-ideas`)
+- **Skill** — invoke a marketplace skill (e.g., `creator-stack:generate-note-ideas`)
 - **Prompt** — run a freeform Claude prompt
 - **Script** — execute a shell script
 
@@ -143,7 +143,7 @@ Present a summary table:
 | ID | weekly-note-ideas |
 | Name | Weekly note ideas |
 | Type | Skill |
-| Target | substack:generate-note-ideas |
+| Target | creator-stack:generate-note-ideas |
 | Frequency | Recurring |
 | Schedule | Every Monday at 8:00 AM (0 8 * * 1) |
 | Max turns | 20 |
@@ -160,7 +160,7 @@ uv run <skill_dir>/scripts/scheduler.py add \
   --id "weekly-note-ideas" \
   --name "Weekly note ideas" \
   --type skill \
-  --target "substack:generate-note-ideas" \
+  --target "creator-stack:generate-note-ideas" \
   --cron "0 8 * * 1" \
   --max-turns 20 \
   --timeout-minutes 15 \

@@ -10,49 +10,14 @@
       "description": "A plugin to turn Claude Code into your personal assistant"
     },
     {
+      "name": "creator-stack",
+      "source": "./creator-stack",
+      "description": "A complete content creation toolkit — writing, content strategy, visual design, AI image generation, branding, and YouTube/Substack platform workflows"
+    },
+    {
       "name": "research",
       "source": "./research",
       "description": "A plugin to add research capabilities to Claude Code"
-    },
-    {
-      "name": "art",
-      "source": "./art",
-      "description": "A plugin to add art capabilities to Claude Code"
-    },
-    {
-      "name": "branding-kit",
-      "source": "./branding-kit",
-      "description": "A plugin to add branding capabilities to Claude Code"
-    },
-    {
-      "name": "writing",
-      "source": "./writing",
-      "description": "A plugin for writing content in Kenny's authentic voice across all content types and platforms"
-    },
-    {
-      "name": "content-strategy",
-      "source": "./content-strategy",
-      "description": "A plugin for content research, title generation, and hook creation across all platforms"
-    },
-    {
-      "name": "visual-design",
-      "source": "./visual-design",
-      "description": "A plugin for creating visual assets including thumbnails and social media graphics"
-    },
-    {
-      "name": "youtube",
-      "source": "./youtube",
-      "description": "A plugin for YouTube content workflows — orchestrates research, writing, and design skills for video production"
-    },
-    {
-      "name": "substack",
-      "source": "./substack",
-      "description": "A plugin for Substack content workflows — orchestrates research, writing, and design skills for newsletter issues and Substack Notes"
-    },
-    {
-      "name": "skill-forge",
-      "source": "./skill-forge",
-      "description": "A meta-plugin for the full skill lifecycle — create, integrate, and improve skills that conform to the composable skill architecture framework"
     },
     {
       "name": "agent-teams",
@@ -62,7 +27,7 @@
     {
       "name": "scheduler",
       "source": "./scheduler",
-      "description": "A plugin for scheduling automated Claude Code tasks using macOS launchd"
+      "description": "A plugin for scheduling automated Claude Code tasks across macOS, Linux, and Windows"
     }
   ]
 }
