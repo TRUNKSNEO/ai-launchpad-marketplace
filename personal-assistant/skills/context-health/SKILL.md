@@ -94,6 +94,8 @@ If found, read the `## System State` section and check:
 - Flag if "Claude Code version at last audit" is "unknown" or differs from current
 - Flag if "Platform docs last fetched" is > 60 days ago
 - If System State section doesn't exist, flag as "never audited"
+- Flag if "Model capabilities last assessed" is missing or > 90 days ago
+- If "Model Capabilities" section doesn't exist in the reference, flag: "Model capabilities never assessed -- run `/evolve` to check for obsolete skills"
 
 If reference file not found, skip with note: "Evolve reference files not found -- cannot check system freshness"
 
