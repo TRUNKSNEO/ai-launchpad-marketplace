@@ -17,6 +17,11 @@
 - Follow Keep a Changelog format: Added, Changed, Fixed, Removed
 - Update the changelog in the same commit (or batch of commits) as the change
 
+### Documentation
+- When adding a new plugin, update the root README.md plugin table
+- When making significant changes to a plugin (new skills, version bumps, structural changes), check if the root README.md or the plugin's own README.md need updating
+- Documentation updates should be included in the same commit or batch of commits as the change
+
 ### Commit Messages
 - Use conventional commits scoped to the plugin: `type(plugin-name): description`
 - Types: feat, fix, refactor, docs, test, chore
