@@ -2,6 +2,15 @@
 
 All notable changes to the Personal Assistant (Elle) plugin.
 
+## [2.4.0] - 2026-03-06
+
+### Added
+
+- **Obsolescence detection in `/evolve`** -- New Phase 1.5 (Obsolescence Screen) evaluates whether each skill/agent is Active, Augmented, or Superseded by platform/model improvements. Superseded components skip structural audit and appear in a new "Recommend Removal" plan tier. New research task 1F fetches model capability updates from Anthropic.
+- **Model Capabilities tracking** -- `platform-capabilities.md` now tracks model-level capabilities (web search, code review, reasoning, etc.) with proficiency ratings and skill design implications. Updated during each `/evolve` run.
+- **Obsolescence guidelines** -- `best-practices.md` now includes classification criteria and removal procedures for superseded skills.
+- **Context-health model freshness flag** -- Check 7 (System Freshness) now flags when model capabilities have never been assessed or are stale, nudging toward `/evolve`.
+
 ## [2.3.0] - 2026-03-06
 
 ### Changed
