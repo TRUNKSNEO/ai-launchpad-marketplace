@@ -106,24 +106,42 @@ def parse_upcoming_triggers(triggers_path: Path, lookahead_days: int = LOOKAHEAD
 
     upcoming = []
     for line in content.split("\n"):
-        match = re.match(r"^\|\s*(\d{4}-\d{2}-\d{2})\s*\|(.+)\|", line)
-        if match:
-            try:
-                event_date = datetime.strptime(match.group(1), "%Y-%m-%d").date()
-                if today <= event_date <= cutoff:
-                    rest = match.group(2).strip().rstrip("|")
-                    cells = [c.strip() for c in rest.split("|")]
-                    event_name = cells[0] if cells else "Unknown"
-                    days_away = (event_date - today).days
-                    if days_away == 0:
-                        timing = "today"
-                    elif days_away == 1:
-                        timing = "tomorrow"
-                    else:
-                        timing = f"in {days_away} days ({event_date.strftime('%a %b %d')})"
-                    upcoming.append(f"- {event_name} -- {timing}")
-            except ValueError:
-                continue
+        stripped = line.strip()
+        # Must be a table row
+        if not stripped.startswith("|"):
+            continue
+        # Skip separator rows (|---|---|)
+        if re.match(r"^\|[\s\-|]+\|$", stripped):
+            continue
+
+        cells = [c.strip() for c in stripped.split("|") if c.strip()]
+        if len(cells) < 2:
+            continue
+
+        date_cell = cells[0]
+        rest_cells = cells[1:]
+
+        # Skip rows marked as completed
+        row_text = " ".join(rest_cells)
+        if any(marker in row_text for marker in ("✅", "❌")):
+            continue
+        if any(marker in date_cell for marker in ("✅", "❌")):
+            continue
+
+        event_date = parse_date_flexible(date_cell)
+        if event_date is None:
+            continue
+
+        if today <= event_date <= cutoff:
+            event_name = rest_cells[0] if rest_cells else "Unknown"
+            days_away = (event_date - today).days
+            if days_away == 0:
+                timing = "today"
+            elif days_away == 1:
+                timing = "tomorrow"
+            else:
+                timing = f"in {days_away} days ({event_date.strftime('%a %b %d')})"
+            upcoming.append(f"- {event_name} -- {timing}")
 
     return upcoming
 

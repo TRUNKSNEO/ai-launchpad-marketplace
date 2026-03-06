@@ -90,6 +90,88 @@ class TestParseTriggers:
         result = parse_upcoming_triggers(triggers_path, lookahead_days=7)
         assert len(result) == 0
 
+    def test_parses_month_day_year_format(self, tmp_context):
+        from session_start import parse_upcoming_triggers
+        future = datetime.now() + timedelta(days=3)
+        date_str = future.strftime("%b %d, %Y")  # e.g. "Mar 09, 2026"
+        triggers_content = textwrap.dedent(f"""\
+            ---
+            name: Triggers
+            ---
+            ## Upcoming
+
+            | Date | Event | Action |
+            |------|-------|--------|
+            | {date_str} | Birthday party | Buy gift |
+        """)
+        triggers_path = tmp_context / "core" / "triggers.md"
+        triggers_path.write_text(triggers_content)
+        result = parse_upcoming_triggers(triggers_path, lookahead_days=7)
+        assert len(result) == 1
+        assert "Birthday party" in result[0]
+
+    def test_parses_bold_date_format(self, tmp_context):
+        from session_start import parse_upcoming_triggers
+        future = datetime.now() + timedelta(days=2)
+        date_str = future.strftime("%b %d, %Y")
+        triggers_content = textwrap.dedent(f"""\
+            ---
+            name: Triggers
+            ---
+            ## Upcoming
+
+            | Date | Event | Action |
+            |------|-------|--------|
+            | **{date_str}** | Deadline | Submit |
+        """)
+        triggers_path = tmp_context / "core" / "triggers.md"
+        triggers_path.write_text(triggers_content)
+        result = parse_upcoming_triggers(triggers_path, lookahead_days=7)
+        assert len(result) == 1
+        assert "Deadline" in result[0]
+
+    def test_parses_month_day_no_year_format(self, tmp_context):
+        from session_start import parse_upcoming_triggers
+        future = datetime.now() + timedelta(days=5)
+        date_str = future.strftime("%b %d")  # e.g. "Mar 11"
+        triggers_content = textwrap.dedent(f"""\
+            ---
+            name: Triggers
+            ---
+            ## Upcoming
+
+            | Date | Event | Person |
+            |------|-------|--------|
+            | {date_str} | Birthday | Jane |
+        """)
+        triggers_path = tmp_context / "core" / "triggers.md"
+        triggers_path.write_text(triggers_content)
+        result = parse_upcoming_triggers(triggers_path, lookahead_days=7)
+        assert len(result) == 1
+        assert "Birthday" in result[0]
+
+    def test_skips_completed_rows(self, tmp_context):
+        from session_start import parse_upcoming_triggers
+        future = datetime.now() + timedelta(days=3)
+        date_str = future.strftime("%Y-%m-%d")
+        triggers_content = textwrap.dedent(f"""\
+            ---
+            name: Triggers
+            ---
+            ## Upcoming
+
+            | Date | Event | Status |
+            |------|-------|--------|
+            | {date_str} | Done thing | ✅ Complete |
+            | {date_str} | Failed thing | ❌ Unsuccessful |
+            | {date_str} | Active thing | ⏰ Upcoming |
+        """)
+        triggers_path = tmp_context / "core" / "triggers.md"
+        triggers_path.write_text(triggers_content)
+        result = parse_upcoming_triggers(triggers_path, lookahead_days=7)
+        assert len(result) == 1
+        assert "Active thing" in result[0]
+
 
 class TestParseDateFlexible:
     """Tests for the multi-format date parser."""
