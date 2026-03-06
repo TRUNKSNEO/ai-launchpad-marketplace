@@ -2,6 +2,18 @@
 
 All notable changes to the Personal Assistant (Elle) plugin.
 
+## [2.5.0] - 2026-03-06
+
+### Added
+
+- **Multi-format date parsing in SessionStart hook** -- Trigger scanning now handles human-readable dates (`Mar 29`, `Dec 19, 2025`, `**Jan 31, 2026**`, `~Feb-Mar 2026`, etc.) instead of only ISO format. Completed rows (with checkmark/cross) are automatically skipped.
+- **Session carryover** -- SessionStart hook now surfaces "Notes for Next Session" from session.md at the start of new sessions, bridging context between conversations.
+- **Milestone extraction in sync_context** -- `elle-core.md` now includes a "Key Milestones" section extracted from projects.md, giving Elle baseline awareness of upcoming life/project milestones.
+
+### Changed
+
+- **elle.md output style** -- Updated "Context Is Pre-Loaded" to reflect auto-surfaced triggers and session carryover. Added behavioral guidance for handling surfaced events. Added `/sync-context` reminder after context updates.
+
 ## [2.4.0] - 2026-03-06
 
 ### Added
