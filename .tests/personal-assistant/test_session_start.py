@@ -239,6 +239,83 @@ class TestParseDateFlexible:
         assert parse_date_flexible("*TBD*") is None
 
 
+class TestSessionCarryover:
+    """Tests for extracting 'Notes for Next Session' from session.md."""
+
+    def test_extracts_notes_for_next_session(self, tmp_context):
+        from session_start import extract_session_carryover
+        session_path = tmp_context / "core" / "session.md"
+        session_path.write_text(textwrap.dedent("""\
+            ---
+            name: Session
+            ---
+            ## Current Focus
+            Working on feature X
+
+            ## Notes for Next Session
+
+            <guide>Context to carry forward</guide>
+
+            - Remember to check the deploy logs
+            - Ask about the API key rotation
+        """))
+        result = extract_session_carryover(session_path)
+        assert "deploy logs" in result
+        assert "API key rotation" in result
+
+    def test_ignores_empty_notes_section(self, tmp_context):
+        from session_start import extract_session_carryover
+        session_path = tmp_context / "core" / "session.md"
+        session_path.write_text(textwrap.dedent("""\
+            ---
+            name: Session
+            ---
+            ## Current Focus
+            Working on feature X
+
+            ## Notes for Next Session
+
+            <guide>Context to carry forward</guide>
+        """))
+        result = extract_session_carryover(session_path)
+        assert result == ""
+
+    def test_handles_missing_session_file(self, tmp_path):
+        from session_start import extract_session_carryover
+        result = extract_session_carryover(tmp_path / "nonexistent.md")
+        assert result == ""
+
+    def test_handles_no_notes_heading(self, tmp_context):
+        from session_start import extract_session_carryover
+        session_path = tmp_context / "core" / "session.md"
+        session_path.write_text(textwrap.dedent("""\
+            ---
+            name: Session
+            ---
+            ## Current Focus
+            Working on feature X
+        """))
+        result = extract_session_carryover(session_path)
+        assert result == ""
+
+    def test_stops_at_next_heading(self, tmp_context):
+        from session_start import extract_session_carryover
+        session_path = tmp_context / "core" / "session.md"
+        session_path.write_text(textwrap.dedent("""\
+            ---
+            name: Session
+            ---
+            ## Notes for Next Session
+            - Important note
+
+            ## Some Other Section
+            - Should not be included
+        """))
+        result = extract_session_carryover(session_path)
+        assert "Important note" in result
+        assert "Should not be included" not in result
+
+
 class TestBootstrapElleCoreIfMissing:
     def test_generates_elle_core_if_missing(self, tmp_context, tmp_rules_dir):
         from session_start import bootstrap_elle_core_if_missing
@@ -314,3 +391,61 @@ class TestMainOutput:
         output = json.loads(captured.out)
         ctx = output["hookSpecificOutput"]["additionalContext"]
         assert "setup" in ctx.lower() or "not set up" in ctx.lower()
+
+    def test_surfaces_both_triggers_and_session_notes(self, tmp_context, tmp_rules_dir, capsys):
+        from session_start import run_hook
+        output_path = tmp_rules_dir / "elle-core.md"
+        output_path.write_text("existing")
+        future_date = (datetime.now() + timedelta(days=2)).strftime("%Y-%m-%d")
+        (tmp_context / "core" / "triggers.md").write_text(textwrap.dedent(f"""\
+            ---
+            name: Triggers
+            ---
+            | Date | Event | Action |
+            |------|-------|--------|
+            | {future_date} | Team meeting | Prepare |
+        """))
+        (tmp_context / "core" / "session.md").write_text(textwrap.dedent("""\
+            ---
+            name: Session
+            ---
+            ## Notes for Next Session
+            - Check the deploy pipeline
+        """))
+        with patch("session_start.CONTEXT_DIR", tmp_context), \
+             patch("session_start.ELLE_CORE_PATH", output_path):
+            run_hook()
+        captured = capsys.readouterr()
+        output = json.loads(captured.out)
+        ctx = output["hookSpecificOutput"]["additionalContext"]
+        assert "Team meeting" in ctx
+        assert "deploy pipeline" in ctx
+
+    def test_surfaces_session_notes_alone(self, tmp_context, tmp_rules_dir, capsys):
+        from session_start import run_hook
+        output_path = tmp_rules_dir / "elle-core.md"
+        output_path.write_text("existing")
+        past_date = (datetime.now() - timedelta(days=10)).strftime("%Y-%m-%d")
+        (tmp_context / "core" / "triggers.md").write_text(textwrap.dedent(f"""\
+            ---
+            name: Triggers
+            ---
+            | Date | Event | Action |
+            |------|-------|--------|
+            | {past_date} | Old event | Done |
+        """))
+        (tmp_context / "core" / "session.md").write_text(textwrap.dedent("""\
+            ---
+            name: Session
+            ---
+            ## Notes for Next Session
+            - Follow up on PR review
+        """))
+        with patch("session_start.CONTEXT_DIR", tmp_context), \
+             patch("session_start.ELLE_CORE_PATH", output_path):
+            run_hook()
+        captured = capsys.readouterr()
+        output = json.loads(captured.out)
+        ctx = output["hookSpecificOutput"]["additionalContext"]
+        assert "PR review" in ctx
+        assert "Upcoming Events" not in ctx

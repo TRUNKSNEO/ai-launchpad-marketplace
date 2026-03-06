@@ -146,6 +146,44 @@ def parse_upcoming_triggers(triggers_path: Path, lookahead_days: int = LOOKAHEAD
     return upcoming
 
 
+def extract_session_carryover(session_path: Path) -> str:
+    """Extract 'Notes for Next Session' content from session.md.
+
+    Returns the text between the '## Notes for Next Session' heading and
+    the next '##' heading (or EOF). Strips <guide> tags and empty lines.
+    Returns empty string if section is missing or has no meaningful content.
+    """
+    if not session_path.exists():
+        return ""
+
+    content = session_path.read_text(encoding="utf-8", errors="replace")
+    lines = content.split("\n")
+
+    # Find the Notes for Next Session heading
+    start_idx = None
+    for i, line in enumerate(lines):
+        if line.strip().startswith("## Notes for Next Session"):
+            start_idx = i + 1
+            break
+
+    if start_idx is None:
+        return ""
+
+    # Collect lines until the next ## heading or EOF
+    collected = []
+    for line in lines[start_idx:]:
+        if line.strip().startswith("## "):
+            break
+        stripped = line.strip()
+        # Skip guide/format tags
+        if stripped.startswith("<") and ("guide>" in stripped or "format>" in stripped):
+            continue
+        if stripped:
+            collected.append(stripped)
+
+    return "\n".join(collected) if collected else ""
+
+
 def bootstrap_elle_core_if_missing(context_dir: Path, elle_core_path: Path) -> bool:
     """Generate elle-core.md if it doesn't exist yet. Returns True if generated."""
     if elle_core_path.exists():
@@ -196,6 +234,13 @@ def run_hook() -> None:
         if upcoming:
             context_parts.append(
                 "## Upcoming Events (next 7 days)\n" + "\n".join(upcoming)
+            )
+
+        session_path = CONTEXT_DIR / "core" / "session.md"
+        carryover = extract_session_carryover(session_path)
+        if carryover:
+            context_parts.append(
+                "## Session Carryover\n" + carryover
             )
 
     additional_context = "\n\n".join(context_parts)
