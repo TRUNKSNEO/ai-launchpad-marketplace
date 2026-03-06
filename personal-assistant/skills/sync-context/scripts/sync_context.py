@@ -8,6 +8,7 @@ that Claude Code loads natively at session start. The derived file:
 - Contains communication preference essentials (~10 lines)
 - Contains ALL rules verbatim (never summarized)
 - Contains active project names + 1-line descriptions
+- Contains pending milestones from the Upcoming Milestones table
 - Contains instructions for reading full context on-demand
 
 Run via: uv run python sync_context.py
@@ -142,6 +143,75 @@ def extract_active_projects(projects_path: Path) -> str:
     return "\n".join(lines)
 
 
+def extract_milestones(projects_path: Path) -> str:
+    """Extract pending milestones from the 'Upcoming Milestones' section of projects.md.
+
+    Skips completed items (rows containing checkmark or cross mark emoji).
+    Returns compact list format: '- Date -- Project: Milestone'
+    """
+    if not projects_path.exists():
+        return ""
+
+    content = projects_path.read_text(encoding="utf-8", errors="replace")
+
+    # Find the Upcoming Milestones section
+    lines = content.split("\n")
+    in_milestones = False
+    in_format_block = False
+    header_words = {"Date", "Project", "Milestone"}
+
+    result_lines = []
+    for line in lines:
+        stripped = line.strip()
+
+        # Track section boundaries
+        if stripped.startswith("## "):
+            in_milestones = "Upcoming Milestones" in stripped
+            continue
+
+        if not in_milestones:
+            continue
+
+        # Skip <format> blocks
+        if "<format>" in stripped:
+            in_format_block = True
+            continue
+        if "</format>" in stripped:
+            in_format_block = False
+            continue
+        if in_format_block:
+            continue
+
+        # Skip non-table lines
+        if "|" not in stripped:
+            continue
+
+        # Skip separator rows
+        if re.match(r"^\|[\s\-|]+\|$", stripped):
+            continue
+
+        cells = [c.strip() for c in stripped.split("|") if c.strip()]
+        if len(cells) < 2:
+            continue
+
+        # Skip header rows
+        header_count = sum(1 for c in cells if c in header_words)
+        if header_count >= len(cells) // 2:
+            continue
+
+        # Skip completed items (checkmark or cross mark emoji)
+        row_text = " ".join(cells)
+        if "✅" in row_text or "❌" in row_text:
+            continue
+
+        date = cells[0]
+        rest = cells[1:]
+        description = " -- ".join(rest)
+        result_lines.append(f"- {date} -- {description}")
+
+    return "\n".join(result_lines)
+
+
 def generate_elle_core_content(context_dir: Path) -> str:
     """Generate the full elle-core.md content from context source files."""
     core_dir = context_dir / "core"
@@ -186,6 +256,15 @@ def generate_elle_core_content(context_dir: Path) -> str:
         sections.append(projects)
     else:
         sections.append("(No projects tracked yet.)")
+    sections.append("")
+
+    milestones = extract_milestones(core_dir / "projects.md")
+
+    sections.append("## Key Milestones")
+    if milestones:
+        sections.append(milestones)
+    else:
+        sections.append("(No upcoming milestones.)")
     sections.append("")
 
     sections.append("## Loading Full Context")

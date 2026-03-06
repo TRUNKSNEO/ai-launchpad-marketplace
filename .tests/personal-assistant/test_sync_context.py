@@ -163,6 +163,62 @@ class TestExtractActiveProjects:
         assert "<guide>" not in result
 
 
+class TestExtractMilestones:
+    def test_extracts_pending_milestones(self, tmp_context):
+        from sync_context import extract_milestones
+        projects = tmp_context / "core" / "projects.md"
+        projects.write_text(textwrap.dedent("""\
+            ## Active Projects
+            | Project | Location | Status |
+            |---------|----------|--------|
+            | App | ~/app | Active |
+
+            ## Upcoming Milestones
+            | Date | Project | Milestone |
+            |------|---------|-----------|
+            | Mar 2026 | IVF | ERA test this cycle |
+            | Apr 2026 | IVF | 3rd transfer |
+            | TBD | SkillStack | First public launch |
+        """))
+        result = extract_milestones(projects)
+        assert "ERA test" in result
+        assert "3rd transfer" in result
+        assert "First public launch" in result
+
+    def test_skips_completed_milestones(self, tmp_context):
+        from sync_context import extract_milestones
+        projects = tmp_context / "core" / "projects.md"
+        projects.write_text(textwrap.dedent("""\
+            ## Upcoming Milestones
+            | Date | Project | Milestone |
+            |------|---------|-----------|
+            | Dec 19, 2025 | IVF | ✅ Embryo transfer complete |
+            | Dec 31, 2025 | IVF | ❌ Negative pregnancy test |
+            | Apr 2026 | IVF | 3rd transfer |
+        """))
+        result = extract_milestones(projects)
+        assert "Embryo transfer" not in result
+        assert "Negative" not in result
+        assert "3rd transfer" in result
+
+    def test_handles_missing_milestones_section(self, tmp_context):
+        from sync_context import extract_milestones
+        projects = tmp_context / "core" / "projects.md"
+        projects.write_text(textwrap.dedent("""\
+            ## Active Projects
+            | Project | Location |
+            |---------|----------|
+            | App | ~/app |
+        """))
+        result = extract_milestones(projects)
+        assert result == ""
+
+    def test_handles_missing_file(self, tmp_path):
+        from sync_context import extract_milestones
+        result = extract_milestones(tmp_path / "nonexistent.md")
+        assert result == ""
+
+
 class TestGenerateElleCoreContent:
     def test_generates_valid_markdown(self, tmp_context):
         from sync_context import generate_elle_core_content
@@ -172,6 +228,7 @@ class TestGenerateElleCoreContent:
         assert "## Communication Preferences" in result
         assert "## Rules" in result
         assert "## Active Projects" in result
+        assert "## Key Milestones" in result
         assert "## Loading Full Context" in result
 
     def test_includes_auto_generated_comment(self, tmp_context):
