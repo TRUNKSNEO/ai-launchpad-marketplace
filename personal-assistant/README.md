@@ -32,7 +32,7 @@ This initializes the context system at `~/.claude/.context/`, generates `~/.clau
 ### Upgrading from v1
 
 ```
-/personal-assistant:upgrade
+/personal-assistant:migrate
 ```
 
 Preserves 100% of your personal data. Only the delivery mechanism changes.
@@ -43,9 +43,8 @@ Preserves 100% of your personal data. Only the delivery mechanism changes.
 |---------|-------------|
 | `/personal-assistant:setup` | First-time setup -- initializes context system and generates elle-core.md |
 | `/personal-assistant:onboard` | Guided conversation to populate your context |
-| `/personal-assistant:upgrade` | Upgrade to latest version (preserves all data) |
+| `/personal-assistant:migrate` | Migrate between versions (preserves all data) |
 | `/personal-assistant:update-context` | Capture new info from current conversation |
-| `/personal-assistant:retrospective` | End-of-session review -- captures lessons and corrections |
 
 ## Skills
 
@@ -53,8 +52,8 @@ Preserves 100% of your personal data. Only the delivery mechanism changes.
 |-------|-------------|
 | `/sync-context` | Regenerate elle-core.md from context source files |
 | `/context-health` | Audit context for staleness, bloat, and contradictions |
-| `/evolve` | Check Elle's architecture against Claude Code capabilities |
 | `/retrospective` | Capture friction, corrections, and improvements |
+| `/evolve` | Check Elle's architecture against Claude Code capabilities |
 
 ## How It Works
 

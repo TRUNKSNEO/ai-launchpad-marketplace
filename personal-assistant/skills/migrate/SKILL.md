@@ -2,6 +2,7 @@
 name: migrate
 description: Migrate your Elle installation between versions. Handles any version-to-version upgrade path with sequential, idempotent steps. Use when updating Elle, when prompted by a version mismatch, or when the user says "migrate Elle" or "upgrade Elle".
 user-invocable: true
+disable-model-invocation: true
 ---
 
 # Migrate -- Version Upgrade System

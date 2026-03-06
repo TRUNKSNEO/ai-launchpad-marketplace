@@ -2,6 +2,7 @@
 name: evolve
 description: Research-driven self-upgrade pipeline for the Elle personal assistant. Fetches latest Claude Code features, audits Elle's architecture, plans upgrades, executes them, and verifies results. Use after Claude Code updates, when exploring new features, or periodically. Also use when the user says "let's modernize Elle", "evolve Elle", or "what Claude Code features are we missing".
 user-invocable: true
+disable-model-invocation: true
 ---
 
 # Evolve -- Research-Driven Self-Upgrade Pipeline

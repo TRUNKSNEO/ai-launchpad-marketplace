@@ -1,5 +1,8 @@
 ---
+name: setup
 description: Set up the personal assistant plugin. Run this once after installing the plugin.
+user-invocable: true
+disable-model-invocation: true
 ---
 
 # Personal Assistant Setup (v2)
@@ -65,7 +68,7 @@ ls ~/.claude/.context/ 2>/dev/null
 ### Fresh Install (only if directory doesn't exist)
 
 ```bash
-cp -r ~/.claude/plugins/marketplaces/ai-launchpad/personal-assistant/context-template/ ~/.claude/.context/
+cp -r ${CLAUDE_PLUGIN_ROOT}/context-template/ ~/.claude/.context/
 ```
 
 ### Verify
@@ -82,7 +85,7 @@ Create the rules directory and generate the derived rules file:
 
 ```bash
 mkdir -p ~/.claude/rules
-uv run python ~/.claude/plugins/marketplaces/ai-launchpad/personal-assistant/skills/sync-context/scripts/sync_context.py
+uv run python ${CLAUDE_PLUGIN_ROOT}/skills/sync-context/scripts/sync_context.py
 ```
 
 ### Verify

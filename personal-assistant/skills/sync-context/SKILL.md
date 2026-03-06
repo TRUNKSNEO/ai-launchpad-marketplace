@@ -3,6 +3,7 @@ name: sync-context
 description: Regenerate ~/.claude/rules/elle-core.md from your context files. Run after significant context updates to keep your session rules current. Use when context feels stale, after /update-context changes rules/preferences/identity, or after /upgrade.
 user-invocable: true
 disable-model-invocation: true
+model: claude-sonnet-4-6
 ---
 
 # Sync Context

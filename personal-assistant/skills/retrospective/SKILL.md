@@ -229,9 +229,9 @@ If no friction was found: report "Clean session — nothing to capture" and exit
 ```
 skill-creator:skill-creator         → Guides skill creation (assistant)
 superpowers:writing-skills          → Tests and deploys skills (TDD)
-personal-assistant:retrospective    → Identifies what needs improving (feedback loop)
-personal-assistant:update-context   → Handles routine context updates (avoid duplication)
-personal-assistant:sync-context     → Regenerates elle-core.md after rule changes
+/retrospective                      → Identifies what needs improving (feedback loop)
+/update-context                     → Handles routine context updates (avoid duplication)
+/sync-context                       → Regenerates elle-core.md after rule changes
 ```
 
 This skill completes the skill lifecycle: create → test → deploy → observe → improve.

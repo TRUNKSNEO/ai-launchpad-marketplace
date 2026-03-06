@@ -1,5 +1,8 @@
 ---
+name: onboard
 description: Get to know the user through a guided conversation to personalize Elle's context.
+user-invocable: true
+disable-model-invocation: true
 ---
 
 # Onboarding — Get to Know the User

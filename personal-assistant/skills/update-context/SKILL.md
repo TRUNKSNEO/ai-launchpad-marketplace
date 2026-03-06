@@ -1,5 +1,8 @@
 ---
+name: update-context
 description: Update the context system based on our conversation so far.
+user-invocable: true
+disable-model-invocation: true
 ---
 
 # Context Update
@@ -51,15 +54,21 @@ For each finding, determine the destination file:
 
 Write updates to the appropriate files. Follow each file's update policy (see context-update.md).
 
-### 5. Sync check
+### 5. Auto-sync
 
-If any of these files were updated, prompt the user:
+If any of these files were updated:
 - `rules.md`
 - `preferences.md`
 - `identity.md`
 - `projects.md`
 
-> "Context files that affect elle-core.md were updated. Run `/sync-context` to regenerate your session rules?"
+Automatically run the sync-context script to regenerate elle-core.md:
+
+```bash
+uv run python ${CLAUDE_PLUGIN_ROOT}/skills/sync-context/scripts/sync_context.py
+```
+
+Report what changed in the sync.
 
 ### 6. Summary
 

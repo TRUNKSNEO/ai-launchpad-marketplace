@@ -2,6 +2,7 @@
 name: context-health
 description: Audit your Elle context system for staleness, contradictions, bloat, and missing data. Use when context feels stale, after major life changes, or periodically for maintenance. Also use when you notice Elle's responses feel generic or out of date.
 user-invocable: true
+model: claude-sonnet-4-6
 ---
 
 # Context Health Audit

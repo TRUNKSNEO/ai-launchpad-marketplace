@@ -2,6 +2,29 @@
 
 All notable changes to the Personal Assistant (Elle) plugin.
 
+## [2.2.0] - 2026-03-05
+
+### Changed
+
+- **Commands to Skills migration** -- Migrated `setup`, `onboard`, and `update-context` from legacy `commands/` format to modern `skills/` format. Gains frontmatter control, `${CLAUDE_SKILL_DIR}` support, and supporting file directories. All existing `/personal-assistant:*` invocations continue to work.
+- **`/update-context` auto-chains to `/sync-context`** -- After updating context files that affect elle-core.md, sync-context now runs automatically instead of prompting.
+- **`/setup` uses `${CLAUDE_PLUGIN_ROOT}`** -- Replaced hardcoded plugin paths with variable substitution for portability.
+
+### Added
+
+- **`disable-model-invocation: true`** on `/evolve`, `/migrate`, `/setup`, `/onboard`, `/update-context` -- Prevents Claude from auto-triggering these side-effect-heavy skills.
+- **`model: claude-sonnet-4-6`** on `/sync-context` and `/context-health` -- Uses Sonnet for lightweight, deterministic workflows to save cost.
+
+### Fixed
+
+- **README** -- Replaced stale `/personal-assistant:upgrade` reference with `/personal-assistant:migrate`. Updated command tables.
+
+### Removed
+
+- **`commands/` directory** -- All commands now live in `skills/`. The `commands/` directory has been removed.
+
+---
+
 ## [2.1.0] - 2026-03-05
 
 ### Added
