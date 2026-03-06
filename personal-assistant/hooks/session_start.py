@@ -18,6 +18,82 @@ CONTEXT_DIR = Path.home() / ".claude" / ".context"
 ELLE_CORE_PATH = Path.home() / ".claude" / "rules" / "elle-core.md"
 LOOKAHEAD_DAYS = 7
 
+# Abbreviated month names for the approximate date parser
+_MONTH_ABBREVS = {
+    "jan": 1, "feb": 2, "mar": 3, "apr": 4, "may": 5, "jun": 6,
+    "jul": 7, "aug": 8, "sep": 9, "oct": 10, "nov": 11, "dec": 12,
+}
+
+
+def parse_date_flexible(date_str: str) -> "date | None":
+    """Parse a date string in various human-readable formats.
+
+    Supported formats:
+    - ISO: 2026-03-29
+    - Month Day, Year: Dec 19, 2025 / Mar 29, 2026
+    - Month Day (no year): Mar 29 (assumes current year)
+    - Day-of-week prefix: Sat Feb 28, 2026
+    - Bold markdown: **Jan 31, 2026**
+    - Approximate: ~Feb-Mar 2026 (uses first month, day 1)
+
+    Returns a date object or None if unparseable.
+    """
+    from datetime import date as date_type
+
+    if not date_str or not date_str.strip():
+        return None
+
+    s = date_str.strip()
+
+    # Strip markdown bold
+    s = s.replace("**", "")
+
+    # Strip emoji and status prefixes
+    s = re.sub(r"^[^\w~*]+", "", s).strip()
+
+    # Strip leading ~ for approximate dates
+    is_approximate = s.startswith("~")
+    if is_approximate:
+        s = s[1:].strip()
+
+    # Handle approximate range: "Feb-Mar 2026" -> use first month, day 1
+    approx_match = re.match(r"([A-Za-z]{3})-[A-Za-z]{3}\s+(\d{4})", s)
+    if approx_match:
+        month_str = approx_match.group(1).lower()
+        year = int(approx_match.group(2))
+        month = _MONTH_ABBREVS.get(month_str)
+        if month:
+            try:
+                return date_type(year, month, 1)
+            except ValueError:
+                return None
+        return None
+
+    # Strip day-of-week prefix: "Sat Feb 28, 2026" -> "Feb 28, 2026"
+    # Only strip when followed by another alpha word (the month name)
+    s = re.sub(r"^[A-Z][a-z]{2}\s+(?=[A-Z][a-z])", "", s)
+
+    # Try ISO format: YYYY-MM-DD
+    try:
+        return datetime.strptime(s, "%Y-%m-%d").date()
+    except ValueError:
+        pass
+
+    # Try Month Day, Year: "Dec 19, 2025"
+    try:
+        return datetime.strptime(s, "%b %d, %Y").date()
+    except ValueError:
+        pass
+
+    # Try Month Day (no year): "Mar 29" -> assume current year
+    try:
+        parsed = datetime.strptime(s, "%b %d").date()
+        return parsed.replace(year=datetime.now().year)
+    except ValueError:
+        pass
+
+    return None
+
 
 def parse_upcoming_triggers(triggers_path: Path, lookahead_days: int = LOOKAHEAD_DAYS) -> list[str]:
     """Parse triggers.md and return events within lookahead_days from today."""

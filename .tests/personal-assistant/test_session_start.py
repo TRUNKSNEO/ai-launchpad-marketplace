@@ -91,6 +91,72 @@ class TestParseTriggers:
         assert len(result) == 0
 
 
+class TestParseDateFlexible:
+    """Tests for the multi-format date parser."""
+
+    def test_parses_iso_date(self):
+        from session_start import parse_date_flexible
+        result = parse_date_flexible("2026-03-29")
+        assert result is not None
+        assert result.year == 2026
+        assert result.month == 3
+        assert result.day == 29
+
+    def test_parses_month_day_year(self):
+        from session_start import parse_date_flexible
+        result = parse_date_flexible("Dec 19, 2025")
+        assert result is not None
+        assert result.year == 2025
+        assert result.month == 12
+        assert result.day == 19
+
+    def test_parses_month_day_year_long(self):
+        from session_start import parse_date_flexible
+        result = parse_date_flexible("Mar 29, 2026")
+        assert result is not None
+        assert result.month == 3
+        assert result.day == 29
+
+    def test_parses_month_day_no_year(self):
+        from session_start import parse_date_flexible
+        result = parse_date_flexible("Mar 29")
+        assert result is not None
+        assert result.month == 3
+        assert result.day == 29
+
+    def test_parses_bold_markdown(self):
+        from session_start import parse_date_flexible
+        result = parse_date_flexible("**Jan 31, 2026**")
+        assert result is not None
+        assert result.month == 1
+        assert result.day == 31
+
+    def test_parses_day_of_week_prefix(self):
+        from session_start import parse_date_flexible
+        result = parse_date_flexible("Sat Feb 28, 2026")
+        assert result is not None
+        assert result.month == 2
+        assert result.day == 28
+
+    def test_parses_approximate_date(self):
+        from session_start import parse_date_flexible
+        result = parse_date_flexible("~Feb-Mar 2026")
+        assert result is not None
+        assert result.month == 2
+        assert result.day == 1
+
+    def test_returns_none_for_garbage(self):
+        from session_start import parse_date_flexible
+        assert parse_date_flexible("not-a-date") is None
+        assert parse_date_flexible("TBD") is None
+        assert parse_date_flexible("") is None
+
+    def test_returns_none_for_tbd(self):
+        from session_start import parse_date_flexible
+        assert parse_date_flexible("TBD") is None
+        assert parse_date_flexible("*TBD*") is None
+
+
 class TestBootstrapElleCoreIfMissing:
     def test_generates_elle_core_if_missing(self, tmp_context, tmp_rules_dir):
         from session_start import bootstrap_elle_core_if_missing
