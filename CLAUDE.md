@@ -18,7 +18,7 @@
 - Update the changelog in the same commit (or batch of commits) as the change
 
 ### Documentation
-- When adding a new plugin, update the root README.md plugin table
+- When adding a new plugin, update BOTH the root README.md plugin table AND `.claude-plugin/marketplace.json`
 - When making significant changes to a plugin (new skills, version bumps, structural changes), check if the root README.md or the plugin's own README.md need updating
 - Documentation updates should be included in the same commit or batch of commits as the change
 
