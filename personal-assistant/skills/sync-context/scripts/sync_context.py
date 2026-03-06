@@ -101,10 +101,16 @@ def extract_rules_verbatim(rules_path: Path) -> str:
     return "\n".join(lines)
 
 
-def extract_active_projects(projects_path: Path) -> str:
-    """Extract active project names and descriptions from projects.md."""
+def extract_active_projects(projects_path: Path) -> tuple[str, str]:
+    """Extract project names and descriptions from the Active Projects section.
+
+    Returns a tuple of (active_lines, paused_lines) where each is a newline-joined
+    string of project entries. Projects are classified by their Status column:
+    - 'Paused' status → paused
+    - Everything else → active
+    """
     if not projects_path.exists():
-        return ""
+        return "", ""
 
     content = projects_path.read_text(encoding="utf-8", errors="replace")
 
@@ -112,10 +118,21 @@ def extract_active_projects(projects_path: Path) -> str:
     header_words = {"Project", "Description", "Location", "Status", "Date",
                     "Milestone", "Completed", "Outcome", "Key Notes"}
 
-    lines = []
+    active_lines = []
+    paused_lines = []
+    in_active_section = False
     in_format_block = False
     for line in content.split("\n"):
         stripped = line.strip()
+
+        # Track section boundaries — only parse ## Active Projects
+        if stripped.startswith("## "):
+            in_active_section = "Active Projects" in stripped
+            continue
+
+        if not in_active_section:
+            continue
+
         # Skip <format> blocks entirely — they contain template table headers
         if "<format>" in stripped:
             in_format_block = True
@@ -138,9 +155,15 @@ def extract_active_projects(projects_path: Path) -> str:
                 continue
             project_name = cells[0]
             description = cells[1]
-            lines.append(f"- {project_name} -- {description}")
+            # Check Status column (index 2) for paused status
+            status = cells[2].lower() if len(cells) > 2 else ""
+            entry = f"- {project_name} -- {description}"
+            if "paused" in status:
+                paused_lines.append(entry)
+            else:
+                active_lines.append(entry)
 
-    return "\n".join(lines)
+    return "\n".join(active_lines), "\n".join(paused_lines)
 
 
 def extract_milestones(projects_path: Path) -> str:
@@ -219,7 +242,7 @@ def generate_elle_core_content(context_dir: Path) -> str:
     identity = extract_identity_summary(core_dir / "identity.md")
     preferences = extract_preferences_summary(core_dir / "preferences.md")
     rules = extract_rules_verbatim(core_dir / "rules.md")
-    projects = extract_active_projects(core_dir / "projects.md")
+    active_projects, paused_projects = extract_active_projects(core_dir / "projects.md")
 
     timestamp = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
 
@@ -252,11 +275,16 @@ def generate_elle_core_content(context_dir: Path) -> str:
     sections.append("")
 
     sections.append("## Active Projects")
-    if projects:
-        sections.append(projects)
+    if active_projects:
+        sections.append(active_projects)
     else:
         sections.append("(No projects tracked yet.)")
     sections.append("")
+
+    if paused_projects:
+        sections.append("## Paused Projects")
+        sections.append(paused_projects)
+        sections.append("")
 
     milestones = extract_milestones(core_dir / "projects.md")
 

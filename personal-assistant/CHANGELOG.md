@@ -2,6 +2,16 @@
 
 All notable changes to the Personal Assistant (Elle) plugin.
 
+## [2.5.1] - 2026-03-06
+
+### Fixed
+
+- **sync_context project extraction** -- `extract_active_projects()` now scopes to the `## Active Projects` section instead of parsing all table rows in `projects.md`. Paused projects, archived projects, and milestones no longer leak into the Active Projects section.
+
+### Changed
+
+- **Paused Projects section in elle-core.md** -- Projects with a "Paused" status now appear under a separate `## Paused Projects` heading instead of being mixed with active projects.
+
 ## [2.5.0] - 2026-03-06
 
 ### Added
