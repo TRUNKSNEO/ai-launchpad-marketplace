@@ -43,3 +43,6 @@ tmp/
 .archive/
 .docs/
 .evals/
+
+# Test workspaces (ephemeral test run data)
+*-test-workspace/
