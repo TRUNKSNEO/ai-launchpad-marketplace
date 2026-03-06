@@ -14,12 +14,7 @@
       "source": "./creator-stack",
       "description": "A complete content creation toolkit — writing, content strategy, visual design, AI image generation, branding, and YouTube/Substack platform workflows"
     },
-    {
-      "name": "research",
-      "source": "./research",
-      "description": "A plugin to add research capabilities to Claude Code"
-    },
-    {
+{
       "name": "agent-teams",
       "source": "./agent-teams",
       "description": "A plugin for Claude Code agent team workflows — session viewing, analysis, and best practice evaluation"
