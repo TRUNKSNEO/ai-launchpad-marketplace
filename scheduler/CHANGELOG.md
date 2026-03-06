@@ -2,6 +2,21 @@
 
 All notable changes to the Scheduler plugin.
 
+## [1.2.0] - 2026-03-06
+
+### Fixed
+
+- **Linux wrapper missing `unset CLAUDECODE`** -- scheduled tasks on Linux could detect a nested Claude Code session and auto-create worktrees
+- **Windows wrapper missing `Remove-Item Env:CLAUDECODE`** -- same nested session bug on Windows
+- **Permission presets missing `bun`** -- added `Bash(bun *)` and `Bash(bunx *)` to the full-edit preset
+
+### Changed
+
+- **Improved skill description** -- trigger-optimized per skill-creator guidance with `user-invocable: true` frontmatter
+- **Complete operation menu** -- added Cleanup (#9) and Repair (#10) to the numbered menu in SKILL.md
+- **Extracted shared `_parse_cron_field`** to `cron_utils.py` -- eliminates duplication across linux, windows, and macos backends
+- **Extracted shared wrapper rendering** to `base.py._render_wrapper()` -- backends now delegate common string substitution to the base class
+
 ## [1.1.2] - 2026-03-05
 
 ### Fixed

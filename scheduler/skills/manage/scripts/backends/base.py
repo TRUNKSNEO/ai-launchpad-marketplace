@@ -74,6 +74,68 @@ class PlatformBackend(abc.ABC):
     def default_schedule_dir(self) -> Path:
         """Return the default directory for schedule artifacts."""
 
+    # --- Shared wrapper generation ---
+
+    def _escape_single_quoted(self, value: str) -> str:
+        """Escape a value for embedding in single quotes in wrapper templates.
+
+        Override in subclasses for platform-specific quoting rules.
+        Default: bash-style single-quote escaping.
+        """
+        return value.replace("'", "'\\''")
+
+    def _render_wrapper(
+        self,
+        task: dict,
+        scheduler_dir: Path,
+        scheduler_py_path: Path,
+        wrappers_dir: Path,
+        make_executable: bool = True,
+    ) -> Path:
+        """Render a wrapper script from the platform template.
+
+        Handles all field substitution and permission flag injection.
+        Subclasses typically call this from generate_wrapper().
+        """
+        template = self.template_path.read_text()
+        escaped_target = self._escape_single_quoted(task["target"])
+
+        wrapper = template.replace("{id}", task["id"])
+        wrapper = wrapper.replace("{type}", task["type"])
+        wrapper = wrapper.replace("{target}", escaped_target)
+        wrapper = wrapper.replace("{max_turns}", str(task["safety"]["max_turns"]))
+        wrapper = wrapper.replace(
+            "{timeout_minutes}", str(task["safety"]["timeout_minutes"])
+        )
+        wrapper = wrapper.replace("{working_directory}", task["working_directory"])
+        wrapper = wrapper.replace(
+            "{run_once}", "true" if task.get("run_once") else "false"
+        )
+        wrapper = wrapper.replace("{scheduler_py}", str(scheduler_py_path))
+        wrapper = wrapper.replace("{scheduler_dir}", str(scheduler_dir.resolve()))
+        wrapper = wrapper.replace(
+            "{output_directory}", task.get("output_directory") or ""
+        )
+
+        # Permission flags
+        permissions = task.get("permissions") or {}
+        allowed_tools = ",".join(permissions.get("allowed_tools") or [])
+        permission_mode = permissions.get("permission_mode") or ""
+        skip_perms = "true" if permission_mode == "bypassPermissions" else "false"
+        if skip_perms == "true":
+            permission_mode = ""  # The flag is standalone
+
+        wrapper = wrapper.replace("{allowed_tools}", self._escape_single_quoted(allowed_tools))
+        wrapper = wrapper.replace("{permission_mode}", permission_mode)
+        wrapper = wrapper.replace("{skip_permissions}", skip_perms)
+
+        wrappers_dir.mkdir(parents=True, exist_ok=True)
+        wrapper_path = wrappers_dir / f"{task['id']}{self.wrapper_extension()}"
+        wrapper_path.write_text(wrapper)
+        if make_executable:
+            wrapper_path.chmod(0o755)
+        return wrapper_path
+
     # --- Optional methods (default no-ops) ---
 
     def get_api_key(self, service_name: str) -> str | None:

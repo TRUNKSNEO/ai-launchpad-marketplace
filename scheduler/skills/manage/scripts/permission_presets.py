@@ -32,6 +32,8 @@ PRESETS: dict[str, list[str]] = {
         "Bash(ls *)",
         "Bash(git *)",
         "Bash(npm *)",
+        "Bash(bun *)",
+        "Bash(bunx *)",
         "Bash(uv *)",
         "Bash(python *)",
         "WebSearch",

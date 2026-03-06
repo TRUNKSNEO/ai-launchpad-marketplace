@@ -1,7 +1,7 @@
 {
   "name": "scheduler",
   "description": "A plugin for scheduling automated Claude Code tasks — cross-platform (macOS, Linux, Windows) recurring and one-off execution of skills, prompts, and scripts with safety controls and notifications",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "author": {
     "name": "Kenny Liao (The AI Launchpad)",
     "url": "https://www.youtube.com/@KennethLiao"

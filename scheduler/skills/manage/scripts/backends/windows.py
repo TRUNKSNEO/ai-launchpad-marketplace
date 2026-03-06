@@ -9,6 +9,7 @@ from pathlib import Path
 from xml.dom import minidom
 
 from backends.base import PlatformBackend
+from cron_utils import parse_cron_field
 
 
 # ---------------------------------------------------------------------------
@@ -34,32 +35,6 @@ _MONTH_NAMES = {
 }
 
 
-def _parse_cron_field(field: str, lo: int, hi: int) -> list[int] | None:
-    """Parse a single cron field into a sorted list of ints, or None for '*'."""
-    if field == "*":
-        return None
-    nums: list[int] = []
-    for part in field.split(","):
-        if "/" in part:
-            range_part, step_str = part.split("/", 1)
-            step = int(step_str)
-            if range_part == "*":
-                r_lo, r_hi = lo, hi
-            elif "-" in range_part:
-                r_lo_s, r_hi_s = range_part.split("-", 1)
-                r_lo, r_hi = int(r_lo_s), int(r_hi_s)
-            else:
-                r_lo = int(range_part)
-                r_hi = hi
-            nums.extend(range(r_lo, r_hi + 1, step))
-        elif "-" in part:
-            a, b = part.split("-", 1)
-            nums.extend(range(int(a), int(b) + 1))
-        else:
-            nums.append(int(part))
-    return sorted(set(nums))
-
-
 def cron_to_schtask_triggers(expr: str) -> list[dict]:
     """Convert a 5-field cron expression to Task Scheduler trigger specs.
 
@@ -74,11 +49,11 @@ def cron_to_schtask_triggers(expr: str) -> list[dict]:
     parts = expr.split()
     minute, hour, dom, month, dow = parts
 
-    minute_vals = _parse_cron_field(minute, 0, 59)
-    hour_vals = _parse_cron_field(hour, 0, 23)
-    dom_vals = _parse_cron_field(dom, 1, 31)
-    month_vals = _parse_cron_field(month, 1, 12)
-    dow_vals = _parse_cron_field(dow, 0, 6)
+    minute_vals = parse_cron_field(minute, 0, 59)
+    hour_vals = parse_cron_field(hour, 0, 23)
+    dom_vals = parse_cron_field(dom, 1, 31)
+    month_vals = parse_cron_field(month, 1, 12)
+    dow_vals = parse_cron_field(dow, 0, 6)
 
     triggers = []
 
@@ -345,6 +320,10 @@ class WindowsBackend(PlatformBackend):
             return result.returncode == 0
         return False
 
+    def _escape_single_quoted(self, value: str) -> str:
+        """PowerShell escapes single quotes by doubling them."""
+        return value.replace("'", "''")
+
     def generate_wrapper(
         self,
         task: dict,
@@ -353,45 +332,10 @@ class WindowsBackend(PlatformBackend):
         wrappers_dir: Path,
     ) -> Path:
         """Generate a PowerShell wrapper script from the Windows template."""
-        template = self.template_path.read_text()
-
-        # PowerShell uses different quoting — escape single quotes by doubling
-        escaped_target = task["target"].replace("'", "''")
-
-        wrapper = template.replace("{id}", task["id"])
-        wrapper = wrapper.replace("{type}", task["type"])
-        wrapper = wrapper.replace("{target}", escaped_target)
-        wrapper = wrapper.replace("{max_turns}", str(task["safety"]["max_turns"]))
-        wrapper = wrapper.replace(
-            "{timeout_minutes}", str(task["safety"]["timeout_minutes"])
+        return self._render_wrapper(
+            task, scheduler_dir, scheduler_py_path, wrappers_dir,
+            make_executable=False,
         )
-        wrapper = wrapper.replace("{working_directory}", task["working_directory"])
-        wrapper = wrapper.replace(
-            "{run_once}", "true" if task.get("run_once") else "false"
-        )
-        wrapper = wrapper.replace("{scheduler_py}", str(scheduler_py_path))
-        wrapper = wrapper.replace("{scheduler_dir}", str(scheduler_dir.resolve()))
-        wrapper = wrapper.replace(
-            "{output_directory}", task.get("output_directory") or ""
-        )
-
-        # Permission flags (escape single quotes for PowerShell)
-        permissions = task.get("permissions") or {}
-        allowed_tools = ",".join(permissions.get("allowed_tools") or [])
-        permission_mode = permissions.get("permission_mode") or ""
-        skip_perms = "true" if permission_mode == "bypassPermissions" else "false"
-        if skip_perms == "true":
-            permission_mode = ""  # The flag is standalone
-
-        wrapper = wrapper.replace("{allowed_tools}", allowed_tools.replace("'", "''"))
-        wrapper = wrapper.replace("{permission_mode}", permission_mode)
-        wrapper = wrapper.replace("{skip_permissions}", skip_perms)
-
-        wrappers_dir.mkdir(parents=True, exist_ok=True)
-        wrapper_path = wrappers_dir / f"{task['id']}{self.wrapper_extension()}"
-        wrapper_path.write_text(wrapper)
-        # No chmod needed on Windows — PowerShell scripts don't need +x
-        return wrapper_path
 
     def wrapper_extension(self) -> str:
         return ".ps1"

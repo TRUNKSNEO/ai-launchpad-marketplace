@@ -16,6 +16,7 @@ $PERMISSION_MODE = '{permission_mode}'
 $SKIP_PERMISSIONS = '{skip_permissions}'
 
 # --- Environment ---
+Remove-Item Env:CLAUDECODE -ErrorAction SilentlyContinue  # Prevent nested session detection
 # Optional: load API key if available (not required for subscription auth)
 try {
     # Try Windows Credential Manager via cmdkey

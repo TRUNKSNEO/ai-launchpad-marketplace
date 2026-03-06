@@ -1,6 +1,7 @@
 ---
 name: manage
-description: Manage scheduled Claude Code tasks — add (recurring or one-off), list, pause, resume, remove, view results, and test execution of skills, prompts, and scripts. Cross-platform (macOS, Linux, Windows). Invoke via /manage.
+description: Manage scheduled Claude Code tasks — add (recurring or one-off), list, pause, resume, remove, view results, and test execution of skills, prompts, and scripts with safety controls and notifications. Use when the user mentions scheduling, cron, automated tasks, recurring tasks, background tasks, running something on a schedule, periodic execution, or wants a skill/prompt/script to run automatically at a set time. Cross-platform (macOS, Linux, Windows).
+user-invocable: true
 ---
 
 # Scheduler
@@ -69,6 +70,8 @@ When the user invokes `/manage`, present the operation menu:
 6. **Results** — view output from a task
 7. **Logs** — view execution logs
 8. **Run now** — test a task immediately
+9. **Cleanup** — delete old logs and results
+10. **Repair** — regenerate wrappers and schedule artifacts
 
 Then execute the selected operation below.
 
@@ -274,6 +277,21 @@ uv run <skill_dir>/scripts/scheduler.py add \
   --cron "0 3 * * 0" \
   --working-directory "{cwd}"
 ```
+
+### Operation: Repair
+
+Regenerate missing or outdated wrapper scripts and schedule artifacts for all active tasks. Useful after plugin updates, permission changes, or if a wrapper was accidentally deleted.
+
+1. Ask whether to force-regenerate all wrappers or only missing ones.
+2. Run:
+```bash
+uv run <skill_dir>/scripts/scheduler.py repair
+```
+Or with force:
+```bash
+uv run <skill_dir>/scripts/scheduler.py repair --force
+```
+3. Report how many issues were fixed.
 
 ### Operation: Run Now
 
