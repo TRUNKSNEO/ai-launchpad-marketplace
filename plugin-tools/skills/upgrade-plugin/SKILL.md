@@ -26,7 +26,7 @@ Set `PLUGIN_ROOT` to the resolved path.
 
 ## Phase 1: Research Latest Context
 
-Run five research tasks in parallel using subagents. Each subagent summarizes its findings.
+Run six research tasks in parallel using subagents. Each subagent summarizes its findings.
 
 ### 1A. Claude Code Changelog
 
@@ -119,6 +119,31 @@ Understand the full plugin specification and what the target plugin could be usi
    - What plugin.json fields exist vs. what it uses?
    - Are other plugins using components this one doesn't?
 
+### 1F. Model Capability Assessment
+
+Check for model-level improvements that may supersede skills in the target plugin:
+
+1. Search for recent Anthropic model releases:
+   ```
+   WebSearch: "Anthropic Claude" model release OR capability update site:anthropic.com
+   WebSearch: "Claude" new capabilities 2026
+   ```
+
+2. Fetch the models overview page:
+   ```
+   WebFetch: https://docs.anthropic.com/en/docs/about-claude/models
+   ```
+
+3. Extract capabilities relevant to skill obsolescence:
+   - Built-in tool use improvements (web search, code execution)
+   - Reasoning and planning improvements
+   - Multi-step task handling
+   - Areas where dedicated prompting/orchestration adds less value
+
+4. Compare against the target plugin's skill inventory:
+   - For each skill, ask: "Does the model now do this well enough without specialized prompting?"
+   - Flag skills where the answer is "yes" or "probably"
+
 ### Research Output
 
 After all research completes, compile a Research Summary with sections:
@@ -127,8 +152,52 @@ After all research completes, compile a Research Summary with sections:
 - **Platform Patterns** (from superpowers and other plugins)
 - **Plugin Architecture Gaps** (capabilities the target plugin doesn't use yet)
 - **Deprecations & Breaking Changes**
+- **Model Capability Overlap** (skills potentially superseded by model improvements)
 
 Save to `<cwd>/.docs/upgrade-research/<plugin-name>-<date>.md` for reference.
+
+---
+
+## Phase 1.5: Obsolescence Screen
+
+Using research findings from Phase 1 (especially 1A, 1B, and 1F), evaluate whether each skill, agent, and major component in the target plugin is still necessary.
+
+### Classification
+
+For each skill and agent, assign one of:
+
+| Rating | Meaning | Action |
+|--------|---------|--------|
+| **Active** | Platform/model doesn't replicate this. Skill adds clear value. | Proceed to structural audit in Phase 2 |
+| **Augmented** | Platform/model handles the basics, but skill adds meaningful structure, guardrails, or workflow orchestration on top. | Audit normally, but note what the platform handles natively |
+| **Superseded** | Platform/model now does this natively with comparable quality. Skill adds marginal value over a direct prompt. | Skip structural audit. Recommend removal in Phase 3 plan. |
+
+### How to Evaluate
+
+For each skill, answer these three questions:
+
+1. **What does this skill do that a direct prompt to Claude cannot?**
+   If the answer is only "it saves typing a prompt" -- likely Superseded.
+
+2. **Does this skill enforce a process, workflow, or multi-step structure?**
+   Process skills (TDD, debugging, code review) remain valuable even when the model can do each step -- the skill enforces discipline. Likely Active.
+
+3. **Has the platform added a native feature that replaces this skill's core function?**
+   Example: Claude Code added native web search -> a "web research" skill that just wraps web search is Superseded. But a "competitor analysis" skill that orchestrates multiple searches into a structured report may be Augmented.
+
+### Output
+
+Present results as a table:
+
+| Component | Type | Rating | Rationale |
+|-----------|------|--------|-----------|
+| [name] | skill/agent | Active/Augmented/Superseded | [1-line reason] |
+
+If any component is rated **Superseded**, flag it for the user:
+
+> **Obsolescence flag:** [N] component(s) appear superseded by platform/model capabilities. These will appear in the "Recommend Removal" section of the upgrade plan. Review the rationale -- override to Active or Augmented if you disagree.
+
+Proceed to Phase 2, skipping structural audit for Superseded components.
 
 ---
 
@@ -153,6 +222,7 @@ For each skill, read and note:
 - Whether it uses references/ or scripts/
 - Composition patterns (does it invoke other skills?)
 - Any hardcoded paths or assumptions
+- Obsolescence rating from Phase 1.5 (skip detailed audit for Superseded components)
 
 For other components, evaluate:
 - **Output styles**: under 120 lines? Leveraging latest features?
@@ -209,6 +279,15 @@ Present a structured upgrade plan organized by priority:
    - **Why**: [What's wrong or deprecated]
    - **What**: [Specific change to make]
    - **Risk**: [What could break]
+
+### Superseded (Recommend Removal)
+Components flagged as Superseded in Phase 1.5. Review before approving removal.
+
+1. [Component name] ([type])
+   - **What it does**: [1-line summary]
+   - **What replaces it**: [platform feature or model capability]
+   - **Migration**: [user-facing steps if any -- update docs, remove references]
+   - **Risk**: [what's lost if removed]
 
 ### Medium Priority (New Features/Improvements)
 1. [Change description]
