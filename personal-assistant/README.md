@@ -21,6 +21,8 @@ Elle transforms Claude Code from a stateless AI into a personal assistant with p
 /plugin install personal-assistant@ai-launchpad-marketplace
 ```
 
+When prompted, select **"Install for you (user scope)"** — the first and recommended option.
+
 Restart Claude Code, then run first-time setup:
 
 ```

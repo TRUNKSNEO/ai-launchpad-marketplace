@@ -33,6 +33,8 @@ tmux new-session -s claude-work
 /plugin install agent-teams@ai-launchpad-marketplace
 ```
 
+When prompted, select **"Install for you (user scope)"** — the first and recommended option.
+
 Restart Claude Code for the changes to take effect.
 
 ## Usage

@@ -13,6 +13,8 @@ Schedule automated Claude Code tasks across macOS, Linux, and Windows. Manage re
 /plugin install scheduler@ai-launchpad-marketplace
 ```
 
+When prompted, select **"Install for you (user scope)"** — the first and recommended option.
+
 Restart Claude Code for the changes to take effect.
 
 ## Platform Support

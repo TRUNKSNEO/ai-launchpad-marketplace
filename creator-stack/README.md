@@ -17,6 +17,8 @@ This plugin consolidates what were previously 7 separate plugins (`writing`, `co
 /plugin install creator-stack@ai-launchpad-marketplace
 ```
 
+When prompted, select **"Install for you (user scope)"** — the first and recommended option.
+
 Restart Claude Code for the changes to take effect.
 
 ## Skills
