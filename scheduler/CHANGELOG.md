@@ -2,6 +2,20 @@
 
 All notable changes to the Scheduler plugin.
 
+## [1.2.1] - 2026-03-23
+
+### Fixed
+
+- **Pause/resume silently failed on all platforms** -- `unload_schedule` and `load_schedule` in macOS, Linux, and Windows backends never verified the OS-level operation succeeded. Registry would show "paused" while the job kept running. All three backends now verify state after load/unload and raise `RuntimeError` on failure.
+- **`cmd_pause` and `cmd_resume` updated registry unconditionally** -- now wrapped in try/except so the registry is only updated if the backend operation actually succeeds. Prints clear error and exits with code 1 on failure.
+- **Base backend missing error contract** -- `load_schedule` and `unload_schedule` docstrings now specify `RuntimeError` is raised on failure.
+
+### Changed
+
+- **SKILL.md Pause operation** -- added post-pause OS-level verification step with platform-specific commands (launchctl, systemctl, schtasks)
+- **SKILL.md Error Recovery** -- added "Task still runs after pausing" entry with diagnosis and manual fix steps for all platforms
+- **SKILL.md List operation** -- added health-check hint to verify paused tasks are actually unloaded at the OS level
+
 ## [1.2.0] - 2026-03-06
 
 ### Fixed

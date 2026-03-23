@@ -300,14 +300,47 @@ class WindowsBackend(PlatformBackend):
             xml_path.unlink()
 
     def load_schedule(self, task_id: str) -> None:
-        """Re-enable the scheduled task (for resume)."""
+        """Re-enable the scheduled task (for resume).
+
+        Raises RuntimeError if the task is not enabled after the attempt.
+        """
         if not self._skip:
-            self._schtasks("/Change", "/TN", self._task_name(task_id), "/ENABLE")
+            task_name = self._task_name(task_id)
+            self._schtasks("/Change", "/TN", task_name, "/ENABLE")
+
+            # Verify the task is actually enabled
+            check = self._schtasks("/Query", "/TN", task_name, "/FO", "CSV", "/NH")
+            if check.returncode != 0:
+                raise RuntimeError(
+                    f"Failed to load scheduled task '{task_name}': "
+                    f"task not found after enable attempt"
+                )
+            # CSV output includes status field — check it's not Disabled
+            if "Disabled" in check.stdout:
+                raise RuntimeError(
+                    f"Failed to load scheduled task '{task_name}': "
+                    f"task is still Disabled after enable attempt"
+                )
 
     def unload_schedule(self, task_id: str) -> None:
-        """Disable the scheduled task (for pause/complete)."""
+        """Disable the scheduled task (for pause/complete).
+
+        Raises RuntimeError if the task is still enabled after the attempt.
+        """
         if not self._skip:
-            self._schtasks("/Change", "/TN", self._task_name(task_id), "/DISABLE")
+            task_name = self._task_name(task_id)
+            self._schtasks("/Change", "/TN", task_name, "/DISABLE")
+
+            # Verify the task is actually disabled
+            check = self._schtasks("/Query", "/TN", task_name, "/FO", "CSV", "/NH")
+            if check.returncode != 0:
+                # Task not found at all — that counts as unloaded
+                return
+            if "Ready" in check.stdout or "Running" in check.stdout:
+                raise RuntimeError(
+                    f"Failed to unload scheduled task '{task_name}': "
+                    f"task is still active after disable attempt"
+                )
 
     def schedule_artifact_exists(self, task_id: str) -> bool:
         """Check whether the task XML file exists."""

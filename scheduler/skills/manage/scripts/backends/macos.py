@@ -108,10 +108,15 @@ class MacOSBackend(PlatformBackend):
         return self.plist_dir / f"{self.plist_prefix}.{task_id}.plist"
 
     def _launchctl_load(self, plist_path: Path) -> None:
-        """Load a plist via launchctl. Skipped when skip_scheduling is True."""
+        """Load a plist via launchctl. Skipped when skip_scheduling is True.
+
+        Raises RuntimeError if the job is not loaded after both bootstrap and
+        legacy load attempts.
+        """
         if self._skip:
             return
         uid = os.getuid()
+        label = plist_path.stem  # e.g. com.ailaunchpad.scheduler.my-task
         result = subprocess.run(
             ["launchctl", "bootstrap", f"gui/{uid}", str(plist_path)],
             capture_output=True,
@@ -125,8 +130,23 @@ class MacOSBackend(PlatformBackend):
                 text=True,
             )
 
+        # Verify the job is actually loaded
+        check = subprocess.run(
+            ["launchctl", "list", label],
+            capture_output=True,
+            text=True,
+        )
+        if check.returncode != 0:
+            raise RuntimeError(
+                f"Failed to load launchd job '{label}': job is not loaded after bootstrap and load attempts"
+            )
+
     def _launchctl_unload(self, plist_path: Path) -> None:
-        """Unload a plist via launchctl. Skipped when skip_scheduling is True."""
+        """Unload a plist via launchctl. Skipped when skip_scheduling is True.
+
+        Raises RuntimeError if the job is still loaded after both bootout and
+        legacy unload attempts.
+        """
         if self._skip:
             return
         uid = os.getuid()
@@ -142,6 +162,17 @@ class MacOSBackend(PlatformBackend):
                 ["launchctl", "unload", str(plist_path)],
                 capture_output=True,
                 text=True,
+            )
+
+        # Verify the job is actually gone
+        check = subprocess.run(
+            ["launchctl", "list", label],
+            capture_output=True,
+            text=True,
+        )
+        if check.returncode == 0:
+            raise RuntimeError(
+                f"Failed to unload launchd job '{label}': job is still loaded after bootout and unload attempts"
             )
 
     # --- PlatformBackend implementation ---

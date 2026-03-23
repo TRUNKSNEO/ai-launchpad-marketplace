@@ -38,11 +38,19 @@ class PlatformBackend(abc.ABC):
 
     @abc.abstractmethod
     def load_schedule(self, task_id: str) -> None:
-        """Resume/load a previously installed schedule."""
+        """Resume/load a previously installed schedule.
+
+        Raises RuntimeError if the load fails and the job is not active
+        after the attempt.
+        """
 
     @abc.abstractmethod
     def unload_schedule(self, task_id: str) -> None:
-        """Pause/unload a schedule without removing artifacts."""
+        """Pause/unload a schedule without removing artifacts.
+
+        Raises RuntimeError if the unload fails and the job is still active
+        after the attempt.
+        """
 
     @abc.abstractmethod
     def schedule_artifact_exists(self, task_id: str) -> bool:

@@ -203,6 +203,11 @@ Present as a formatted table:
 
 If no tasks exist, say "No scheduled tasks yet. Use Add to create one."
 
+**Note**: The list shows registry status only. If any tasks show as "paused", the user can verify no jobs are still loaded at the OS level:
+- **macOS**: `launchctl list | grep ailaunchpad`
+- **Linux**: `systemctl --user list-timers | grep ailaunchpad`
+- **Windows**: `schtasks /Query /TN "\AILaunchpad\Scheduler\"`
+
 ### Operation: Pause
 
 1. Run `list` to show active tasks
@@ -211,7 +216,17 @@ If no tasks exist, say "No scheduled tasks yet. Use Add to create one."
 ```bash
 uv run <skill_dir>/scripts/scheduler.py pause --id "{task_id}"
 ```
-4. Confirm: "Paused '{task_id}'. It won't run until you resume it."
+4. If the command exits with an error, report the failure to the user and do NOT tell them the task is paused.
+5. On success, verify at the OS level that the job is actually unloaded:
+   - **macOS**: `launchctl list | grep com.ailaunchpad.scheduler.{task_id}`
+   - **Linux**: `systemctl --user is-active ailaunchpad-scheduler-{task_id}.timer`
+   - **Windows**: `schtasks /Query /TN "\AILaunchpad\Scheduler\{task_id}"`
+
+If the job still appears active, warn the user:
+   - **macOS**: "The registry shows paused, but the launchd job is still loaded. Try manually unloading: `launchctl unload ~/Library/LaunchAgents/com.ailaunchpad.scheduler.{task_id}.plist`"
+   - **Linux**: "The registry shows paused, but the systemd timer is still active. Try manually stopping: `systemctl --user disable --now ailaunchpad-scheduler-{task_id}.timer`"
+   - **Windows**: "The registry shows paused, but the scheduled task is still enabled. Try manually disabling: `schtasks /Change /TN \"\\AILaunchpad\\Scheduler\\{task_id}\" /DISABLE`"
+6. Confirm: "Paused '{task_id}'. It won't run until you resume it."
 
 ### Operation: Resume
 
@@ -362,6 +377,12 @@ uv run <skill_dir>/scripts/scheduler.py repair
 **"Task failed (check logs)"**: Use the Logs operation to show what went wrong.
 **"Task succeeded but output is empty"**: Likely a permission issue. Scheduled tasks run non-interactively and can't prompt for tool approval. Add a permission preset (e.g., `--permission-preset readonly` for read-only tasks) and regenerate wrappers with `repair --force`.
 **"Wrapper needs permission update"**: After changing a task's permissions in the registry, run `repair --force` to regenerate all wrappers with the new settings.
+**"Task still runs after pausing"**: Registry says paused but the job is still loaded. Verify at the OS level:
+- **macOS**: `launchctl list | grep com.ailaunchpad.scheduler.{task_id}` — if loaded, manually unload: `launchctl unload ~/Library/LaunchAgents/com.ailaunchpad.scheduler.{task_id}.plist`
+- **Linux**: `systemctl --user is-active ailaunchpad-scheduler-{task_id}.timer` — if active, manually disable: `systemctl --user disable --now ailaunchpad-scheduler-{task_id}.timer`
+- **Windows**: `schtasks /Query /TN "\AILaunchpad\Scheduler\{task_id}"` — if still Ready/Running, manually disable: `schtasks /Change /TN "\AILaunchpad\Scheduler\{task_id}" /DISABLE`
+
+Root cause: the unload command failed silently. The backends now verify and raise RuntimeError, but older tasks may need `repair` to regenerate artifacts.
 
 ## Notes
 

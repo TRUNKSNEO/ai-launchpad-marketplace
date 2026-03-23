@@ -244,16 +244,38 @@ class LinuxBackend(PlatformBackend):
         self._daemon_reload()
 
     def load_schedule(self, task_id: str) -> None:
-        """Re-enable and start the timer (for resume)."""
+        """Re-enable and start the timer (for resume).
+
+        Raises RuntimeError if the timer is not active after the attempt.
+        """
         if not self._skip:
             timer_name = f"{self._unit_name(task_id)}.timer"
             self._systemctl("enable", "--now", timer_name)
 
+            # Verify the timer is actually active
+            check = self._systemctl("is-active", timer_name)
+            if check.stdout.strip() != "active":
+                raise RuntimeError(
+                    f"Failed to load systemd timer '{timer_name}': "
+                    f"timer is '{check.stdout.strip()}' after enable attempt"
+                )
+
     def unload_schedule(self, task_id: str) -> None:
-        """Disable the timer without removing unit files (for pause/complete)."""
+        """Disable the timer without removing unit files (for pause/complete).
+
+        Raises RuntimeError if the timer is still active after the attempt.
+        """
         if not self._skip:
             timer_name = f"{self._unit_name(task_id)}.timer"
             self._systemctl("disable", "--now", timer_name)
+
+            # Verify the timer is actually stopped
+            check = self._systemctl("is-active", timer_name)
+            if check.stdout.strip() == "active":
+                raise RuntimeError(
+                    f"Failed to unload systemd timer '{timer_name}': "
+                    f"timer is still active after disable attempt"
+                )
 
     def schedule_artifact_exists(self, task_id: str) -> bool:
         """Check whether both .service and .timer files exist."""

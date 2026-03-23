@@ -354,7 +354,11 @@ def cmd_pause(args: argparse.Namespace) -> None:
     if registry["tasks"][args.id]["status"] == "paused":
         _error(f"Task '{args.id}' is already paused.")
 
-    backend.unload_schedule(args.id)
+    try:
+        backend.unload_schedule(args.id)
+    except RuntimeError as exc:
+        print(f"Error pausing task '{args.id}': {exc}", file=sys.stderr)
+        sys.exit(1)
 
     registry["tasks"][args.id]["status"] = "paused"
     _save_registry(registry)
@@ -370,7 +374,11 @@ def cmd_resume(args: argparse.Namespace) -> None:
     if registry["tasks"][args.id]["status"] == "active":
         _error(f"Task '{args.id}' is already active.")
 
-    backend.load_schedule(args.id)
+    try:
+        backend.load_schedule(args.id)
+    except RuntimeError as exc:
+        print(f"Error resuming task '{args.id}': {exc}", file=sys.stderr)
+        sys.exit(1)
 
     registry["tasks"][args.id]["status"] = "active"
     _save_registry(registry)
@@ -388,7 +396,11 @@ def cmd_complete(args: argparse.Namespace) -> None:
     if args.id not in registry["tasks"]:
         _error(f"Task '{args.id}' not found.")
 
-    backend.unload_schedule(args.id)
+    try:
+        backend.unload_schedule(args.id)
+    except RuntimeError as exc:
+        print(f"Error completing task '{args.id}': {exc}", file=sys.stderr)
+        sys.exit(1)
 
     registry["tasks"][args.id]["status"] = "completed"
     _save_registry(registry)
