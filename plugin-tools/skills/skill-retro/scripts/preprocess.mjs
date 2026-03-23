@@ -89,6 +89,7 @@ function truncate(str, max = 500) {
 }
 
 function extractContentString(content) {
+  if (content == null) return '';
   if (typeof content === 'string') return content;
   if (Array.isArray(content)) {
     // tool_result content can be an array of text blocks
