@@ -32,7 +32,7 @@ Capture the JSON output. Key fields:
 Spawn an analysis sub-agent (using the Agent tool):
 - Load the prompt from `${CLAUDE_SKILL_DIR}/references/analysis-prompt.md`
 - Append the full transcript from Step 1 after the prompt
-- The agent should read the SKILL.md file for each invoked skill to compare intended vs. actual behavior
+- The agent should read the SKILL.md file for each invoked skill to compare intended vs. actual behavior. Skill paths are discoverable from the transcript's system-reminder blocks (which list installed skill base directories) or from `[SKILL INVOCATION]` markers combined with installed plugin cache paths.
 - The agent returns a JSON object with `findings`, `well_executed`, and `severity_summary`
 
 Parse the agent's response into structured findings.
@@ -46,18 +46,21 @@ Display findings to the user, grouped by skill:
 ```
 ## Skill Performance Report
 
-### <plugin>:<skill-name> (N findings)
+### superpowers:brainstorming (2 findings)
 
-| # | Severity | Dimension         | Observation                        |
-|---|----------|-------------------|------------------------------------|
-| 1 | medium   | gap_coverage      | No guidance for X constraint       |
-| 2 | low      | execution_quality | Asked too many questions before... |
+| # | Severity | Dimension         | Observation                                    |
+|---|----------|-------------------|------------------------------------------------|
+| 1 | medium   | gap_coverage      | No guidance for context-efficiency constraints |
+| 2 | low      | execution_quality | Asked 5 clarifying questions before proposing  |
 
-### <plugin>:<skill-name> (N findings)
-...
+### cold-email (1 finding)
+
+| # | Severity | Dimension         | Observation                                          |
+|---|----------|-------------------|------------------------------------------------------|
+| 3 | low      | trigger_accuracy  | Skill didn't trigger when user discussed subject lines |
 
 ### Well Executed
-- <skill-name> — Brief note on what went well
+- superpowers:writing-plans — Produced clean, actionable plan with correct task ordering
 
 ---
 Select findings to action (comma-separated numbers, "all", or "none"):
@@ -133,13 +136,14 @@ After all implementation agents complete, present a summary:
 ### Changes Applied
 | Skill | Source Path | Changes |
 |-------|------------|---------|
-| <plugin>:<skill> | /path/to/SKILL.md | <brief description> |
+| superpowers:brainstorming | /path/to/SKILL.md | Added context-efficiency section |
+| cold-email | /path/to/SKILL.md | Added trigger keywords: "subject line", "email subject" |
 
 ### Skipped
-- <skill>: user chose not to action
+- copywriting: user chose not to action
 
 ### Well Executed (no changes needed)
-- <skill> — <note>
+- superpowers:writing-plans — Produced clean, actionable plan with correct task ordering
 ```
 
 ## Important Notes
